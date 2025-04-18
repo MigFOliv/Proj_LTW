@@ -3,7 +3,7 @@
 <h2> Bem-vindo à Plataforma de Freelancers!</h2>
 <p>Descobre e contrata serviços de freelancers ou oferece os teus próprios serviços.</p>
 
-<h3>🆕 Serviços em Destaque</h3>
+<h3>Serviços em Destaque</h3>
 
 <ul>
     <li><strong>Design de Logotipo</strong> – por <em>joana.design</em> – 50€</li>
