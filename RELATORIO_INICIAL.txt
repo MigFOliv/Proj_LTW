@@ -1,0 +1,47 @@
+Raiz do Projeto 
+index.php
+Ficheiro principal de entrada do site. Pode redirecionar para pages/home.php ou carregar a homepage diretamente.
+
+database.db
+Base de dados SQLite usada para guardar toda a informação (utilizadores, serviços, mensagens, etc).
+
+login.php
+Formulário para os utilizadores entrarem no sistema. Valida credenciais e inicia a sessão.
+
+logout.php
+Encerra a sessão do utilizador e redireciona para a homepage.
+
+register.php
+Formulário de registo. Cria um novo utilizador na base de dados com password segura.
+
+includes/
+Contém código reutilizável que é incluído em várias páginas.
+
+auth.php
+Função require_login() que protege páginas privadas e redireciona para login se necessário.
+
+db.php
+Responsável por criar a ligação PDO à base de dados SQLite.
+
+header.php
+Início do layout das páginas. Inclui o título, navegação, e começa o HTML.
+
+footer.php
+Fecha o HTML das páginas. Contém o rodapé do site.
+
+pages/
+Contém as páginas secundárias ou estruturadas por secção.
+
+home.php
+Página inicial do site com destaque de serviços e introdução à plataforma.
+
+dashboard.php
+Área privada do utilizador freelancer onde pode ver os serviços que criou. Protegida por login.
+
+(Em breve também existirá aqui: add_service.php, services.php, service_detail.php, etc.)
+
+css/
+Contém os ficheiros de estilos (folhas de estilo CSS).
+
+style.css
+Define o estilo básico do site: cores, fontes, espaçamento, aparência da navegação e rodapé.
