@@ -1,7 +1,7 @@
 <?php
-require_once 'includes/auth.php';
+require_once '../includes/auth.php';
 require_login();
-require_once 'includes/db.php';
+require_once '../includes/db.php';
 
 $errors = [];
 $success = false;
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
+<?php include '../includes/header.php'; ?>
 
 <h2>➕ Criar Novo Serviço</h2>
 
@@ -70,6 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button type="submit">Criar Serviço</button>
 </form>
 
-<p><a href="pages/dashboard.php">⬅️ Voltar ao painel</a></p>
+<p><a href="dashboard.php">⬅️ Voltar ao painel</a></p>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
