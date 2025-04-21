@@ -1,11 +1,14 @@
 <?php
-require_once 'includes/auth.php';
-require_login(); // Garante que o utilizador está autenticado
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-require_once 'includes/db.php';
-include 'includes/header.php';
+require_once '../includes/auth.php';
+require_login(); 
 
-// Buscar os serviços do utilizador logado
+require_once '../includes/db.php';
+include '../includes/header.php';
+
 $stmt = $db->prepare("SELECT * FROM services WHERE freelancer_id = :id ORDER BY id DESC");
 $stmt->execute([':id' => $_SESSION['user_id']]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -33,4 +36,4 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </ul>
 <?php endif; ?>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
