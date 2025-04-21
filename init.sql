@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
--- Categorias de serviços (mantida caso precises no futuro)
+-- Categorias de serviços 
 CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS services (
     description TEXT,
     price REAL NOT NULL,
     delivery_time TEXT NOT NULL,
-    category TEXT, -- campo texto em vez de chave estrangeira
+    category TEXT, 
     media_path TEXT,
     is_promoted INTEGER DEFAULT 0,
     FOREIGN KEY(freelancer_id) REFERENCES users(id)
