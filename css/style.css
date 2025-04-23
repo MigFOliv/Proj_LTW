@@ -124,3 +124,25 @@ footer {
     margin-top: 3rem;
     border-top: 4px solid #1558b0;
 }
+
+/* Estilo específico para páginas de login e registo */
+.auth-container {
+    max-width: 500px;
+    margin: 3rem auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container form {
+    margin-top: 1rem;
+}
+
+.auth-container input {
+    width: 100%;
+}
+
+.auth-container p {
+    text-align: center;
+}
