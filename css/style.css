@@ -77,12 +77,12 @@ ul {
 
 .service-item {
     border-left: 4px solid #1a73e8;
-    padding-left: 10px;
     margin-bottom: 1rem;
     background: #f0f4f9;
     border-radius: 5px;
     padding: 10px;
 }
+
 
 .primary-btn {
     background-color: #1a73e8;
