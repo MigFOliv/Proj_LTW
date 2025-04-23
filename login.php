@@ -1,14 +1,13 @@
 <?php
-session_start();
 require_once 'includes/db.php';
+session_start();
 
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    // Verifica se o utilizador existe
     $stmt = $db->prepare("SELECT * FROM users WHERE username = :username");
     $stmt->execute([':username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -16,23 +15,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
-        $_SESSION['is_admin'] = $user['is_admin'];
-        header('Location: index.php');
+        header("Location: pages/dashboard.php");
         exit();
     } else {
         $errors[] = "Credenciais inválidas.";
     }
 }
+
+require_once 'includes/header.php';
 ?>
 
-<h2>Iniciar Sessão</h2>
+<main class="auth-container">
+    <h2>🔐 Iniciar Sessão</h2>
 
-<?php foreach ($errors as $error): ?>
-    <p style="color:red;"><?= htmlspecialchars($error) ?></p>
-<?php endforeach; ?>
+    <?php foreach ($errors as $e): ?>
+        <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+    <?php endforeach; ?>
 
-<form method="post">
-    <label>Utilizador:<br><input type="text" name="username" required></label><br><br>
-    <label>Password:<br><input type="password" name="password" required></label><br><br>
-    <button type="submit">Entrar</button>
-</form>
+    <form method="post">
+        <label>Utilizador:
+            <input type="text" name="username" required>
+        </label>
+
+        <label>Password:
+            <input type="password" name="password" required>
+        </label>
+
+        <button type="submit" class="primary-btn">Entrar</button>
+    </form>
+
+    <p style="text-align: center;">Ainda não tens conta? <a href="register.php">Regista-te aqui</a></p>
+</main>
+
+<?php include 'includes/footer.php'; ?>
