@@ -1,13 +1,8 @@
 <?php
-require_once '../includes/db.php';
 require_once '../includes/header.php';
+require_once '../includes/db.php';
 
-// Obter todos os serviços com nome do freelancer e nome da categoria
-$stmt = $db->query("SELECT s.*, u.username, c.name AS category_name
-                    FROM services s
-                    JOIN users u ON s.freelancer_id = u.id
-                    LEFT JOIN categories c ON s.category_id = c.id
-                    ORDER BY s.id DESC");
+$stmt = $db->query("SELECT s.*, u.username FROM services s JOIN users u ON s.freelancer_id = u.id ORDER BY s.id DESC");
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -21,13 +16,11 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h3><?= htmlspecialchars($s['title']) ?></h3>
             <p><em><?= htmlspecialchars($s['description']) ?></em></p>
             <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
-            <p><small>Por <strong><?= htmlspecialchars($s['username']) ?></strong> • Categoria: <?= htmlspecialchars($s['category_name'] ?? '—') ?></small></p>
+            <p><small>Por <strong><?= htmlspecialchars($s['username']) ?></strong> • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?></small></p>
 
-            <p>
-                <a href="service_detail.php?id=<?= $s['id'] ?>">
-                    <button class="primary-btn">🔍 Ver mais</button>
-                </a>
-            </p>
+            <a href="service_detail.php?id=<?= $s['id'] ?>">
+                <button class="primary-btn">🔍 Ver mais</button>
+            </a>
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
