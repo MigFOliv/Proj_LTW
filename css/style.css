@@ -7,16 +7,21 @@ body {
     color: #333;
 }
 
-header, footer {
+header {
     background-color: #1a73e8;
     color: white;
     padding: 1rem 2rem;
     text-align: center;
+    border-bottom: 4px solid #1558b0;
 }
 
 header h1 {
     margin: 0;
     font-size: 1.8rem;
+}
+
+nav {
+    margin-top: 0.5rem;
 }
 
 nav a {
@@ -33,10 +38,10 @@ nav a:hover {
 main {
     padding: 2rem;
     max-width: 900px;
-    margin: auto;
+    margin: 2rem auto;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Títulos */
@@ -72,7 +77,9 @@ button, .primary-btn, .danger-btn {
     cursor: pointer;
 }
 
-button:hover {
+button:hover,
+.primary-btn:hover,
+.danger-btn:hover {
     opacity: 0.9;
 }
 
@@ -106,4 +113,14 @@ ul {
     border-left: 4px solid #1a73e8;
     border-radius: 5px;
     margin-bottom: 15px;
+}
+
+/* Rodapé */
+footer {
+    background-color: #1a73e8;
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    margin-top: 3rem;
+    border-top: 4px solid #1558b0;
 }
