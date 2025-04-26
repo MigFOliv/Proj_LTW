@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ? htmlspecialchars($user['profile_image']) 
         : 'uploads/profiles/default_profile.png';
 ?>
-<img src="/<?= $profileImg ?>" alt="Foto de Perfil" width="150" style="border-radius: 8px;">
+<img src="/<?= $profileImg ?>" alt="Foto de Perfil" class="profile-picture" width="150" style="border-radius: 50%;">
 
 <h2>Perfil</h2>
 
