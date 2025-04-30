@@ -23,6 +23,7 @@ $cssPath = (strpos($_SERVER['PHP_SELF'], '/pages/') !== false) ? '../css/style.c
 
         <?php if (isset($_SESSION['user_id'])): ?>
             <a href="/pages/dashboard.php">🎯 Painel</a>
+            <a href="profile.php">👤 Perfil</a>
             <a href="/logout.php">🚪 Logout (<?= htmlspecialchars($_SESSION['username']) ?>)</a>
         <?php else: ?>
             <a href="/login.php">🔐 Login</a>
