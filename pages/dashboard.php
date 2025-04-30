@@ -14,40 +14,41 @@ $stmt->execute([':id' => $_SESSION['user_id']]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>🎯 Painel do Freelancer</h2>
-<p>Olá, <strong><?= htmlspecialchars($_SESSION['username']) ?></strong>! Aqui estão os teus serviços.</p>
+<main>
+    <h2>🎯 Painel do Freelancer</h2>
+    <p>Olá, <strong><?= htmlspecialchars($_SESSION['username']) ?></strong>! Aqui estão os teus serviços.</p>
 
-<p>
-    <a href="add_service.php">
-        <button class="primary-btn">➕ Adicionar novo serviço</button>
-    </a>
-</p>
+    <p>
+        <a href="add_service.php">
+            <button class="primary-btn">➕ Adicionar novo serviço</button>
+        </a>
+    </p>
 
-<?php if (count($services) === 0): ?>
-    <p>Ainda não criaste nenhum serviço.</p>
-<?php else: ?>
-    <ul>
-        <?php foreach ($services as $service): ?>
-            <li class="service-item">
-                <strong><?= htmlspecialchars($service['title']) ?></strong> –
-                <?= htmlspecialchars($service['price']) ?>€ –
-                <?= htmlspecialchars($service['delivery_time']) ?>
-                <br>
-                <em><?= htmlspecialchars($service['description']) ?></em>
-                <br><br>
-                <a href="edit_service.php?id=<?= $service['id'] ?>">
-                    <button class="primary-btn">✏️ Editar</button>
-                </a>
-                <!-- Botão de apagar a adicionar depois -->
-                <!--
-                <a href="delete_service.php?id=<?= $service['id'] ?>">
-                    <button class="danger-btn">❌ Apagar</button>
-                </a>
-                -->
-                <hr>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
+    <?php if (count($services) === 0): ?>
+        <p>Ainda não criaste nenhum serviço.</p>
+    <?php else: ?>
+        <ul>
+            <?php foreach ($services as $service): ?>
+                <li class="service-item">
+                    <strong><?= htmlspecialchars($service['title']) ?></strong> –
+                    <?= htmlspecialchars($service['price']) ?>€ –
+                    <?= htmlspecialchars($service['delivery_time']) ?>
+                    <br>
+                    <em><?= htmlspecialchars($service['description']) ?></em>
+                    <br><br>
+                    <a href="edit_service.php?id=<?= $service['id'] ?>">
+                        <button class="primary-btn">✏️ Editar</button>
+                    </a>
+                    <!--
+                    <a href="delete_service.php?id=<?= $service['id'] ?>">
+                        <button class="danger-btn">❌ Apagar</button>
+                    </a>
+                    -->
+                    <hr>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</main>
 
 <?php include '../includes/footer.php'; ?>

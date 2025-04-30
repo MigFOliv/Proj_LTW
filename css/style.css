@@ -1,6 +1,6 @@
 /* Layout geral */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background-color: #f5f7fa;
     margin: 0;
     padding: 0;
@@ -37,11 +37,12 @@ nav a:hover {
 
 main {
     padding: 2rem;
-    max-width: 900px;
-    margin: 2rem auto;
+    width: 100%;
+    max-width: 700px;
+    margin: 3rem auto;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Títulos */
@@ -66,6 +67,7 @@ input, textarea, button {
     border-radius: 5px;
     border: 1px solid #ccc;
     box-sizing: border-box;
+    font-size: 14px;
 }
 
 /* Botões */
@@ -75,12 +77,13 @@ button, .primary-btn, .danger-btn {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: 0.2s ease;
 }
 
 button:hover,
 .primary-btn:hover,
 .danger-btn:hover {
-    opacity: 0.9;
+    opacity: 0.95;
 }
 
 .primary-btn {
@@ -88,17 +91,9 @@ button:hover,
     color: white;
 }
 
-.primary-btn:hover {
-    background-color: #0f5fd0;
-}
-
 .danger-btn {
     background-color: #e53935;
     color: white;
-}
-
-.danger-btn:hover {
-    background-color: #c62828;
 }
 
 /* Listas */
@@ -121,37 +116,26 @@ footer {
     color: white;
     padding: 1rem 2rem;
     text-align: center;
-    margin-top: 3rem;
+    margin-top: 4rem;
     border-top: 4px solid #1558b0;
 }
 
-/* Estilo específico para páginas de login e registo */
+/* Área de autenticação */
 .auth-container {
     max-width: 500px;
     margin: 3rem auto;
-    background-color: #fff;php -S localhost:8060
-
-<<<<<<< HEAD
-.auth-container form {
-    margin-top: 1rem;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-.auth-container input {
-    width: 100%;
-}
-
-.auth-container p {
-    text-align: center;
-}
-
-/* Foto de Perfil */
+/* Foto de perfil */
 .profile-picture {
     width: 150px;
     height: 150px;
     object-fit: cover;
     border-radius: 50%;
     margin: 0 auto 20px auto;
+    display: block;
 }
-=======
-    
->>>>>>> f2315aa (contactar o freelancer)
