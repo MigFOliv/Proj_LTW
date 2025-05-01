@@ -21,7 +21,12 @@ if (!$service) {
 }
 ?>
 
+<main>
 <h2>🔍 Detalhes do Serviço</h2>
+
+<?php if (isset($_GET['hired'])): ?>
+    <p style="color: green;">✅ Serviço contratado com sucesso!</p>
+<?php endif; ?>
 
 <div class="service-item">
     <h3><?= htmlspecialchars($service['title']) ?></h3>
@@ -36,8 +41,14 @@ if (!$service) {
             <button class="primary-btn">💬 Contactar Freelancer</button>
         </a>
     </p>
+    <p>
+        <a href="hire_service.php?service=<?= $service['id'] ?>">
+            <button class="primary-btn">🛒 Contratar Serviço</button>
+        </a>
+    </p>
 <?php endif; ?>
 
 <p><a href="services.php">⬅️ Voltar à lista</a></p>
+</main>
 
 <?php include '../includes/footer.php'; ?>
