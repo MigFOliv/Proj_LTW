@@ -34,7 +34,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <small>Estado: <strong><?= ucfirst($req['status']) ?></strong></small><br><br>
 
                     <?php if ($req['status'] === 'pending'): ?>
-                        <a href="mark_completed.php?transaction=<?= $req['id'] ?>">
+                        <a href="complete_order.php?transaction=<?= $req['id'] ?>">
                             <button class="primary-btn">✔️ Marcar como Entregue</button>
                         </a>
                     <?php else: ?>

@@ -34,7 +34,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <small>Estado: <strong><?= ucfirst($order['status']) ?></strong></small><br><br>
 
                     <?php if ($order['status'] === 'completed'): ?>
-                        <a href="review_service.php?transaction=<?= $order['id'] ?>">
+                        <a href="service_review.php?transaction=<?= $order['id'] ?>">
                             <button class="primary-btn">⭐ Avaliar Serviço</button>
                         </a>
                     <?php endif; ?>
