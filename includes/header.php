@@ -27,6 +27,11 @@ $cssPath = (strpos($_SERVER['PHP_SELF'], '/pages/') !== false) ? '../css/style.c
             <a href="/pages/my_requests.php">📨 Pedidos Recebidos</a>
             <a href="/pages/messages.php">💬 Mensagens</a>
             <a href="/pages/profile.php">👤 Perfil</a>
+
+            <?php if (!empty($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1): ?>
+                <a href="/pages/admin.php">⚙️ Admin</a>
+            <?php endif; ?>
+
             <a href="/logout.php">🚪 Logout (<?= htmlspecialchars($_SESSION['username']) ?>)</a>
         <?php else: ?>
             <a href="/login.php">🔐 Login</a>
