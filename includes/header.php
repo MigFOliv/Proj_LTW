@@ -3,8 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Define o caminho correto para o CSS 
-$cssPath = (strpos($_SERVER['PHP_SELF'], '/pages/') !== false) ? '../css/style.css' : 'css/style.css';
+// caminho para os ficheiros CSS e JS
+$isInPagesFolder = strpos($_SERVER['PHP_SELF'], '/pages/') !== false;
+$cssPath = $isInPagesFolder ? '../css/style.css' : 'css/style.css';
+$jsPath = $isInPagesFolder ? '../js/main.js' : 'js/main.js';
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +29,7 @@ $cssPath = (strpos($_SERVER['PHP_SELF'], '/pages/') !== false) ? '../css/style.c
             <a href="/pages/my_requests.php">📨 Pedidos Recebidos</a>
             <a href="/pages/messages.php">💬 Mensagens</a>
             <a href="/pages/profile.php">👤 Perfil</a>
+            <button class="toggle-dark" onclick="toggleDarkMode()">🌙 Modo Escuro</button>
 
             <?php if (!empty($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1): ?>
                 <a href="/pages/admin.php">⚙️ Admin</a>
@@ -39,5 +42,5 @@ $cssPath = (strpos($_SERVER['PHP_SELF'], '/pages/') !== false) ? '../css/style.c
         <?php endif; ?>
     </nav>
 </header>
-
-<main>
+<script src="<?= $jsPath ?>"></script>
+        </body>
