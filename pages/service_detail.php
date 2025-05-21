@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
 require_once '../includes/header.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -40,8 +41,10 @@ if (isset($_SESSION['user_id'])) {
     <?php endif; ?>
 
     <div class="service-item">
-        <?php if (!empty($service['media_path']) && file_exists($service['media_path'])): ?>
-            <img src="<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
+        <?php
+        $imgPath = '../' . $service['media_path'];
+        if (!empty($service['media_path']) && file_exists($imgPath)): ?>
+            <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
         <?php endif; ?>
 
         <h3><?= htmlspecialchars($service['title']) ?></h3>
@@ -62,9 +65,10 @@ if (isset($_SESSION['user_id'])) {
             </a>
         </p>
 
-        <!-- Botão de Favorito -->
+        <!-- Botão de Favorito seguro -->
         <form action="toggle_favorite.php" method="post" style="display: inline;">
             <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
             <button type="submit" class="primary-btn">
                 <?= $isFavorite ? '💔 Remover dos Favoritos' : '❤️ Adicionar aos Favoritos' ?>
             </button>
@@ -111,4 +115,3 @@ if (isset($_SESSION['user_id'])) {
 </main>
 
 <?php include '../includes/footer.php'; ?>
-

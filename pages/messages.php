@@ -1,25 +1,37 @@
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
 include '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
+$errors = [];
 
 // Enviar nova mensagem
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'], $_POST['receiver_id'])) {
-    $content = trim($_POST['message']);
-    $receiver = (int) $_POST['receiver_id'];
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $errors[] = "Token CSRF inválido.";
+    } else {
+        $content = trim($_POST['message']);
+        $receiver = (int) $_POST['receiver_id'];
 
-    if (!empty($content)) {
-        $stmt = $db->prepare("INSERT INTO messages (sender_id, receiver_id, content) VALUES (:s, :r, :c)");
-        $stmt->execute([
-            ':s' => $user_id,
-            ':r' => $receiver,
-            ':c' => $content
-        ]);
-        header("Location: messages.php?user=$receiver");
-        exit();
+        if (empty($content)) {
+            $errors[] = "A mensagem não pode estar vazia.";
+        } elseif (strlen($content) > 1000) {
+            $errors[] = "A mensagem é demasiado longa (máximo 1000 caracteres).";
+        }
+
+        if (empty($errors)) {
+            $stmt = $db->prepare("INSERT INTO messages (sender_id, receiver_id, content) VALUES (:s, :r, :c)");
+            $stmt->execute([
+                ':s' => $user_id,
+                ':r' => $receiver,
+                ':c' => $content
+            ]);
+            header("Location: messages.php?user=$receiver");
+            exit();
+        }
     }
 }
 ?>
@@ -28,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'], $_POST['re
     <h2>💬 Minhas Conversas</h2>
 
     <?php
-    // Buscar contactos (utilizadores com quem já falou)
+    // Buscar contactos
     $stmt = $db->prepare("
         SELECT u.id, u.username
         FROM users u
@@ -94,15 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'], $_POST['re
                     ?>
                     <div style="text-align: <?= $align ?>; margin: 0.5rem 0;">
                         <div style="display:inline-block; background: <?= $bg ?>; padding: 10px; border-radius: 8px; max-width: 70%;">
-                            <?= htmlspecialchars($msg['content']) ?>
+                            <?= nl2br(htmlspecialchars($msg['content'])) ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
 
+            <?php foreach ($errors as $e): ?>
+                <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+            <?php endforeach; ?>
+
             <form method="post">
                 <input type="hidden" name="receiver_id" value="<?= $other_id ?>">
-                <textarea name="message" rows="2" required placeholder="Escreve uma mensagem..."></textarea>
+                <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                <textarea name="message" rows="2" maxlength="1000" required placeholder="Escreve uma mensagem..."></textarea>
                 <button type="submit" class="primary-btn">Enviar</button>
             </form>
         <?php

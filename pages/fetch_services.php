@@ -1,10 +1,18 @@
 <?php
 require_once '../includes/db.php';
 
+header('Content-Type: text/html; charset=UTF-8');
+
 $selectedCategory = $_GET['category'] ?? '';
 $minPrice = $_GET['min_price'] ?? '';
 $maxPrice = $_GET['max_price'] ?? '';
 $sort = $_GET['sort'] ?? 'latest';
+
+// Limitar valores aceites para sort
+$allowedSort = ['latest', 'price_asc', 'price_desc', 'rating'];
+if (!in_array($sort, $allowedSort)) {
+    $sort = 'latest';
+}
 
 $query = "
     SELECT s.*, u.username,
@@ -55,9 +63,12 @@ if (count($services) === 0) {
 } else {
     foreach ($services as $s) {
         echo '<div class="service-item">';
-        if (!empty($s['media_path']) && file_exists($s['media_path'])) {
-            echo '<img src="' . htmlspecialchars($s['media_path']) . '" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">';
+        
+        $imgPath = '../' . $s['media_path'];
+        if (!empty($s['media_path']) && file_exists($imgPath)) {
+            echo '<img src="/' . htmlspecialchars($s['media_path']) . '" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">';
         }
+
         echo '<h3>' . htmlspecialchars($s['title']) . '</h3>';
         if ($s['avg_rating'] !== null) {
             echo '<p>⭐ ' . number_format($s['avg_rating'], 1) . ' / 5</p>';
@@ -65,7 +76,7 @@ if (count($services) === 0) {
         echo '<p><em>' . htmlspecialchars($s['description']) . '</em></p>';
         echo '<p><strong>' . htmlspecialchars($s['price']) . '€</strong> • Entrega: ' . htmlspecialchars($s['delivery_time']) . '</p>';
         echo '<p><small>Por <strong>' . htmlspecialchars($s['username']) . '</strong> • Categoria: ' . htmlspecialchars($s['category'] ?? '—') . '</small></p>';
-        echo '<a href="service_detail.php?id=' . $s['id'] . '"><button class="primary-btn">🔍 Ver mais</button></a>';
+        echo '<a href="service_detail.php?id=' . (int)$s['id'] . '"><button class="primary-btn">🔍 Ver mais</button></a>';
         echo '</div>';
     }
 }

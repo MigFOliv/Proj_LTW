@@ -34,9 +34,20 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <small>Estado: <strong><?= ucfirst($order['status']) ?></strong></small><br><br>
 
                     <?php if ($order['status'] === 'completed'): ?>
-                        <a href="service_review.php?transaction=<?= $order['id'] ?>">
-                            <button class="primary-btn">⭐ Avaliar Serviço</button>
-                        </a>
+                        <?php
+                        // Verificar se já foi avaliado
+                        $check = $db->prepare("SELECT 1 FROM reviews WHERE transaction_id = :tid");
+                        $check->execute([':tid' => $order['id']]);
+                        $alreadyReviewed = $check->fetchColumn();
+                        ?>
+
+                        <?php if (!$alreadyReviewed): ?>
+                            <a href="service_review.php?transaction=<?= $order['id'] ?>">
+                                <button class="primary-btn">⭐ Avaliar Serviço</button>
+                            </a>
+                        <?php else: ?>
+                            <p style="color: green;">✅ Já avaliado</p>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

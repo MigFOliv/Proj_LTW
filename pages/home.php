@@ -1,4 +1,19 @@
-<?php include '../includes/header.php'; ?>
+<?php
+require_once '../includes/db.php';
+include '../includes/header.php';
+
+// Buscar até 6 serviços promovidos
+$stmt = $db->prepare("
+    SELECT s.*, u.username
+    FROM services s
+    JOIN users u ON s.freelancer_id = u.id
+    WHERE s.is_promoted = 1
+    ORDER BY s.id DESC
+    LIMIT 6
+");
+$stmt->execute();
+$featured = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 
 <main>
     <section class="hero">
@@ -9,25 +24,24 @@
 
     <section class="featured-services">
         <h3>✨ Serviços em Destaque</h3>
-        <div class="card-grid">
-            <div class="service-card">
-                <h4>🎨 Design de Logotipo</h4>
-                <p><strong>por:</strong> joana.design</p>
-                <p><strong>Preço:</strong> 50€</p>
-            </div>
-            <div class="service-card">
-                <h4>📝 Tradução PT-EN</h4>
-                <p><strong>por:</strong> miguel.trad</p>
-                <p><strong>Preço:</strong> 25€</p>
-            </div>
-            <div class="service-card">
-                <h4>💻 Criação de Website</h4>
-                <p><strong>por:</strong> dev.goncalo</p>
-                <p><strong>Preço:</strong> 100€</p>
-            </div>
-        </div>
 
-        <p class="see-all"><a href="services.php">🔍 Ver todos os serviços</a></p>
+        <?php if (count($featured) === 0): ?>
+            <p>Sem serviços promovidos no momento. <a href="services.php">Explora todos</a>.</p>
+        <?php else: ?>
+            <div class="card-grid">
+                <?php foreach ($featured as $s): ?>
+                    <div class="service-card">
+                        <h4><?= htmlspecialchars($s['title']) ?></h4>
+                        <p><strong>por:</strong> <?= htmlspecialchars($s['username']) ?></p>
+                        <p><strong>Preço:</strong> <?= htmlspecialchars($s['price']) ?>€</p>
+                        <a href="service_detail.php?id=<?= $s['id'] ?>">
+                            <button class="primary-btn">Ver mais</button>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <p class="see-all"><a href="services.php">🔍 Ver todos os serviços</a></p>
+        <?php endif; ?>
     </section>
 </main>
 

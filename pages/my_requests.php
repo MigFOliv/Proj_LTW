@@ -1,12 +1,13 @@
+
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
 include '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Buscar pedidos recebidos (clientes que contrataram os serviços do freelancer)
 $stmt = $db->prepare("
     SELECT t.*, s.title, u.username AS client_name
     FROM transactions t
@@ -34,9 +35,11 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <small>Estado: <strong><?= ucfirst($req['status']) ?></strong></small><br><br>
 
                     <?php if ($req['status'] === 'pending'): ?>
-                        <a href="complete_order.php?transaction=<?= $req['id'] ?>">
-                            <button class="primary-btn">✔️ Marcar como Entregue</button>
-                        </a>
+                        <form method="post" action="complete_order.php" onsubmit="return confirm('Confirmas que este serviço foi entregue?');" style="display:inline;">
+                            <input type="hidden" name="transaction" value="<?= $req['id'] ?>">
+                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                            <button type="submit" class="primary-btn">✔️ Marcar como Entregue</button>
+                        </form>
                     <?php else: ?>
                         <em>✅ Entregue em <?= date('d/m/Y', strtotime($req['completed_at'])) ?></em>
                     <?php endif; ?>
