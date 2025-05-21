@@ -9,7 +9,7 @@ $user_id = $_SESSION['user_id'];
 
 // Serviços favoritos do utilizador
 $stmt = $db->prepare("
-    SELECT s.*, u.username
+    SELECT s.*, u.username, u.id AS freelancer_id
     FROM favorites f
     JOIN services s ON f.service_id = s.id
     JOIN users u ON s.freelancer_id = u.id
@@ -38,7 +38,11 @@ $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h3><?= htmlspecialchars($s['title']) ?></h3>
             <p><em><?= htmlspecialchars($s['description']) ?></em></p>
             <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
-            <p><small>Por <strong><?= htmlspecialchars($s['username']) ?></strong> • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?></small></p>
+            <p><small>
+                Por <strong><?= htmlspecialchars($s['username']) ?></strong>
+                (<a href="public_profile.php?id=<?= $s['freelancer_id'] ?>">👤 Ver perfil</a>)
+                • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?>
+            </small></p>
 
             <form method="post" action="toggle_favorite.php" style="display:inline;" onsubmit="return confirm('Remover dos favoritos?');">
                 <input type="hidden" name="service_id" value="<?= $s['id'] ?>">

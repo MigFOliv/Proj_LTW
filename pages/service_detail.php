@@ -50,7 +50,11 @@ if (isset($_SESSION['user_id'])) {
         <h3><?= htmlspecialchars($service['title']) ?></h3>
         <p><em><?= htmlspecialchars($service['description']) ?></em></p>
         <p><strong><?= htmlspecialchars($service['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($service['delivery_time']) ?></p>
-        <p><small>Por <strong><?= htmlspecialchars($service['username']) ?></strong> • Categoria: <?= htmlspecialchars($service['category']) ?></small></p>
+        <p><small>
+            Por <strong><?= htmlspecialchars($service['username']) ?></strong>
+            (<a href="public_profile.php?id=<?= $service['freelancer_id'] ?>">👤 Ver perfil</a>)
+            • Categoria: <?= htmlspecialchars($service['category']) ?>
+        </small></p>
     </div>
 
     <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $service['freelancer_id']): ?>

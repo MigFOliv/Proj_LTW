@@ -73,6 +73,12 @@ $profileImg = !empty($user['profile_image'])
 
 <h2>Perfil</h2>
 
+<p>
+    <a href="public_profile.php?id=<?= $_SESSION['user_id'] ?>" class="primary-btn">
+        👁 Ver meu perfil público
+    </a>
+</p>
+
 <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
@@ -87,6 +93,7 @@ $profileImg = !empty($user['profile_image'])
 
     <button type="submit">Guardar Alterações</button>
 </form>
+
 
 <h3>Informações da Conta</h3>
 <ul>

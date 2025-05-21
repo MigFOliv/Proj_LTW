@@ -1,3 +1,4 @@
+
 <?php
 require_once '../includes/auth.php';
 require_login();
@@ -29,7 +30,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($orders as $order): ?>
                 <li class="service-item">
                     <strong><?= htmlspecialchars($order['title']) ?></strong><br>
-                    <small>Freelancer: <?= htmlspecialchars($order['freelancer_name']) ?></small><br>
+                    <small>
+                        Freelancer: <?= htmlspecialchars($order['freelancer_name']) ?>
+                        (<a href="public_profile.php?id=<?= $order['freelancer_id'] ?>">👤 Ver perfil</a>)
+                    </small><br>
                     <small>Data: <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></small><br>
                     <small>Estado: <strong><?= ucfirst($order['status']) ?></strong></small><br><br>
 

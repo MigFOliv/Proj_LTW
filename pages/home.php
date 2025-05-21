@@ -31,18 +31,24 @@ $featured = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="card-grid">
                 <?php foreach ($featured as $s): ?>
                     <div class="service-card">
+                        <?php if (!empty($s['media_path']) && file_exists('../' . $s['media_path'])): ?>
+                            <img src="/<?= htmlspecialchars($s['media_path']) ?>" alt="Imagem do serviço" style="width:100%; max-height:150px; object-fit:cover; border-radius: 8px;">
+                        <?php endif; ?>
+
                         <h4><?= htmlspecialchars($s['title']) ?></h4>
                         <p><strong>por:</strong> <?= htmlspecialchars($s['username']) ?></p>
-                        <p><strong>Preço:</strong> <?= htmlspecialchars($s['price']) ?>€</p>
+                        <p><strong>Preço:</strong> €<?= number_format($s['price'], 2) ?></p>
+
                         <a href="service_detail.php?id=<?= $s['id'] ?>">
-                            <button class="primary-btn">Ver mais</button>
+                            <button class="primary-btn">🔍 Ver mais</button>
                         </a>
                     </div>
                 <?php endforeach; ?>
             </div>
-            <p class="see-all"><a href="services.php">🔍 Ver todos os serviços</a></p>
+            <p class="see-all"><a href="services.php">🔎 Ver todos os serviços</a></p>
         <?php endif; ?>
     </section>
 </main>
 
 <?php include '../includes/footer.php'; ?>
+

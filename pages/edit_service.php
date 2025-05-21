@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = floatval($_POST['price'] ?? 0);
         $delivery = trim($_POST['delivery_time'] ?? '');
         $category = trim($_POST['category'] ?? '');
+        $is_promoted = isset($_POST['is_promoted']) ? 1 : 0;
         $newMediaPath = $service['media_path'];
 
         // Upload de nova imagem (opcional)
@@ -61,12 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "Preenche todos os campos obrigatórios corretamente.";
         }
 
-        // Atualizar serviço
         if (empty($errors)) {
             $update = $db->prepare("
                 UPDATE services 
                 SET title = :title, description = :desc, price = :price, 
-                    delivery_time = :delivery, category = :category, media_path = :media 
+                    delivery_time = :delivery, category = :category, 
+                    media_path = :media, is_promoted = :promoted
                 WHERE id = :id AND freelancer_id = :uid
             ");
             $update->execute([
@@ -76,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':delivery' => $delivery,
                 ':category' => $category,
                 ':media' => $newMediaPath,
+                ':promoted' => $is_promoted,
                 ':id' => $service_id,
                 ':uid' => $_SESSION['user_id']
             ]);
@@ -87,7 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'price' => $price,
                 'delivery_time' => $delivery,
                 'category' => $category,
-                'media_path' => $newMediaPath
+                'media_path' => $newMediaPath,
+                'is_promoted' => $is_promoted
             ]);
         }
     }
@@ -127,6 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label>Categoria:<br>
         <input type="text" name="category" value="<?= htmlspecialchars($service['category']) ?>">
+    </label><br>
+
+    <label>
+        <input type="checkbox" name="is_promoted" value="1" <?= $service['is_promoted'] ? 'checked' : '' ?>>
+        ⭐ Destacar serviço na página inicial
     </label><br>
 
     <?php if (!empty($service['media_path']) && file_exists('../' . $service['media_path'])): ?>

@@ -23,6 +23,10 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <a href="add_service.php">
             <button class="primary-btn">➕ Adicionar novo serviço</button>
         </a>
+
+        <a href="stats.php">
+            <button class="secondary-btn">📊 Ver Estatísticas</button>
+        </a>
     </p>
 
     <?php if (count($services) === 0): ?>
@@ -38,9 +42,10 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
                     <?php endif; ?>
 
-                    <strong><?= htmlspecialchars($service['title']) ?></strong> –
-                    <?= htmlspecialchars($service['price']) ?>€ –
-                    <?= htmlspecialchars($service['delivery_time']) ?>
+                    <strong><?= htmlspecialchars($service['title']) ?></strong>
+                    <?= $service['is_promoted'] ? ' <span title="Promovido">⭐</span>' : '' ?>
+                    <br>
+                    <span><strong><?= htmlspecialchars($service['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($service['delivery_time']) ?></span>
                     <br>
                     <em><?= htmlspecialchars($service['description']) ?></em>
                     <br><br>

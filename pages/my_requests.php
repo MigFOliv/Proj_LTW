@@ -29,21 +29,25 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <ul>
             <?php foreach ($requests as $req): ?>
                 <li class="service-item">
-                    <strong><?= htmlspecialchars($req['title']) ?></strong><br>
-                    <small>Cliente: <?= htmlspecialchars($req['client_name']) ?></small><br>
-                    <small>Data: <?= date('d/m/Y H:i', strtotime($req['created_at'])) ?></small><br>
-                    <small>Estado: <strong><?= ucfirst($req['status']) ?></strong></small><br><br>
+    <strong><?= htmlspecialchars($req['title']) ?></strong><br>
+    <small>
+        Cliente: <?= htmlspecialchars($req['client_name']) ?>
+        (<a href="public_profile.php?id=<?= $req['client_id'] ?>">👤 Ver perfil</a>)
+    </small><br>
+    <small>Data: <?= date('d/m/Y H:i', strtotime($req['created_at'])) ?></small><br>
+    <small>Estado: <strong><?= ucfirst($req['status']) ?></strong></small><br><br>
 
-                    <?php if ($req['status'] === 'pending'): ?>
-                        <form method="post" action="complete_order.php" onsubmit="return confirm('Confirmas que este serviço foi entregue?');" style="display:inline;">
-                            <input type="hidden" name="transaction" value="<?= $req['id'] ?>">
-                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-                            <button type="submit" class="primary-btn">✔️ Marcar como Entregue</button>
-                        </form>
-                    <?php else: ?>
-                        <em>✅ Entregue em <?= date('d/m/Y', strtotime($req['completed_at'])) ?></em>
-                    <?php endif; ?>
-                </li>
+    <?php if ($req['status'] === 'pending'): ?>
+        <form method="post" action="complete_order.php" onsubmit="return confirm('Confirmas que este serviço foi entregue?');" style="display:inline;">
+            <input type="hidden" name="transaction" value="<?= $req['id'] ?>">
+            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+            <button type="submit" class="primary-btn">✔️ Marcar como Entregue</button>
+        </form>
+    <?php else: ?>
+        <em>✅ Entregue em <?= date('d/m/Y', strtotime($req['completed_at'])) ?></em>
+    <?php endif; ?>
+</li>
+        
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>
