@@ -19,6 +19,17 @@ if (!$service) {
     include '../includes/footer.php';
     exit();
 }
+
+// Verificar se já é favorito
+$isFavorite = false;
+if (isset($_SESSION['user_id'])) {
+    $checkFav = $db->prepare("SELECT 1 FROM favorites WHERE user_id = :uid AND service_id = :sid");
+    $checkFav->execute([
+        ':uid' => $_SESSION['user_id'],
+        ':sid' => $service['id']
+    ]);
+    $isFavorite = $checkFav->fetchColumn();
+}
 ?>
 
 <main>
@@ -50,10 +61,20 @@ if (!$service) {
                 <button class="primary-btn">🛒 Contratar Serviço</button>
             </a>
         </p>
+
+        <!-- Botão de Favorito -->
+        <form action="toggle_favorite.php" method="post" style="display: inline;">
+            <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+            <button type="submit" class="primary-btn">
+                <?= $isFavorite ? '💔 Remover dos Favoritos' : '❤️ Adicionar aos Favoritos' ?>
+            </button>
+        </form>
     <?php endif; ?>
 
+    <hr>
+    <h3>⭐ Avaliações</h3>
+
     <?php
-    // Obter avaliações
     $stmt = $db->prepare("
         SELECT r.rating, r.comment, t.completed_at, u.username
         FROM reviews r
@@ -63,12 +84,8 @@ if (!$service) {
     ");
     $stmt->execute([':sid' => $service['id']]);
     $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
     $media = count($reviews) ? array_sum(array_column($reviews, 'rating')) / count($reviews) : null;
     ?>
-
-    <hr>
-    <h3>⭐ Avaliações</h3>
 
     <?php if ($media !== null): ?>
         <p><strong>Média:</strong> <?= number_format($media, 1) ?> / 5 ⭐</p>
@@ -94,4 +111,10 @@ if (!$service) {
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $service['freelancer_id']): ?>
+    <button class="primary-btn" onclick="toggleFavorite(<?= $service['id'] ?>, this)">
+        ☆ Adicionar aos Favoritos
+    </button>
+<?php endif; ?>
 

@@ -67,3 +67,15 @@ CREATE TABLE IF NOT EXISTS reviews (
     comment TEXT,
     FOREIGN KEY(transaction_id) REFERENCES transactions(id)
 );
+
+-- Serviços Favoritos
+CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    service_id INTEGER NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, service_id),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(service_id) REFERENCES services(id)
+);
+
