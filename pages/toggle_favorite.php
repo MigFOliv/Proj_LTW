@@ -1,7 +1,18 @@
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
+
+// Garantir que é um pedido POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Requisição inválida.");
+}
+
+// Validar token CSRF
+if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    die("Token CSRF inválido.");
+}
 
 $user_id = $_SESSION['user_id'];
 $service_id = $_POST['service_id'] ?? null;
@@ -35,6 +46,6 @@ if ($isFavorite) {
     ]);
 }
 
-// Voltar à página do serviço
+// Redirecionar para a página anterior
 header("Location: service_detail.php?id=" . $service_id);
 exit();

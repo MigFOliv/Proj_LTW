@@ -1,12 +1,22 @@
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
 
-$service_id = $_GET['id'] ?? null;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Requisição inválida.");
+}
+
+$service_id = $_POST['id'] ?? null;
+
+// Verifica CSRF
+if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    die("Token CSRF inválido.");
+}
 
 // Verifica se o ID é válido
-if (!$service_id) {
+if (!$service_id || !is_numeric($service_id)) {
     die("ID inválido.");
 }
 
@@ -29,6 +39,5 @@ $delete->execute([
     ':uid' => $_SESSION['user_id']
 ]);
 
-// Redireciona de volta para o dashboard
 header("Location: dashboard.php");
 exit();

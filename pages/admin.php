@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/auth.php';
+require_once '../includes/csrf.php';
 require_login();
 require_once '../includes/db.php';
 include '../includes/header.php';
@@ -11,20 +12,33 @@ if ($_SESSION['is_admin'] != 1) {
     exit();
 }
 
-// Lidar com promoção
+// Lidar com promoção de utilizador a admin
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['promote_id'])) {
-    $stmt = $db->prepare("UPDATE users SET is_admin = 1 WHERE id = :id");
-    $stmt->execute([':id' => $_POST['promote_id']]);
-    echo "<p style='color:green;'>Utilizador promovido a admin.</p>";
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        die("Token CSRF inválido.");
+    }
+
+    $promote_id = (int) $_POST['promote_id'];
+    if ($promote_id > 0) {
+        $stmt = $db->prepare("UPDATE users SET is_admin = 1 WHERE id = :id");
+        $stmt->execute([':id' => $promote_id]);
+        echo "<p style='color:green;'>Utilizador promovido a admin.</p>";
+    }
 }
 
 // Lidar com nova categoria
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_category'])) {
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        die("Token CSRF inválido.");
+    }
+
     $name = trim($_POST['new_category']);
-    if (!empty($name)) {
+    if (!empty($name) && strlen($name) <= 50) {
         $stmt = $db->prepare("INSERT OR IGNORE INTO categories (name) VALUES (:name)");
         $stmt->execute([':name' => $name]);
         echo "<p style='color:green;'>Categoria adicionada.</p>";
+    } else {
+        echo "<p style='color:red;'>Nome de categoria inválido.</p>";
     }
 }
 
@@ -50,6 +64,7 @@ $categories = $db->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll
                 <?php if (!$u['is_admin']): ?>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="promote_id" value="<?= $u['id'] ?>">
+                        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                         <button class="primary-btn" type="submit">👑 Promover</button>
                     </form>
                 <?php endif; ?>
@@ -69,7 +84,8 @@ $categories = $db->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll
 
 <form method="post">
     <label>Nova categoria:</label>
-    <input type="text" name="new_category" required>
+    <input type="text" name="new_category" required maxlength="50">
+    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
     <button class="primary-btn" type="submit">➕ Adicionar</button>
 </form>
 </main>

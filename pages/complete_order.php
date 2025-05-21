@@ -1,15 +1,23 @@
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
 
-$user_id = $_SESSION['user_id'];
-
-if (!isset($_GET['transaction']) || !is_numeric($_GET['transaction'])) {
-    die("Pedido inválido.");
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Requisição inválida.");
 }
 
-$transaction_id = (int) $_GET['transaction'];
+if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    die("Token CSRF inválido.");
+}
+
+$user_id = $_SESSION['user_id'];
+$transaction_id = $_POST['transaction'] ?? null;
+
+if (!$transaction_id || !is_numeric($transaction_id)) {
+    die("Pedido inválido.");
+}
 
 // Verifica se a transação pertence a um serviço do freelancer autenticado
 $stmt = $db->prepare("

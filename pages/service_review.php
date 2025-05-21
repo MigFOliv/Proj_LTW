@@ -1,7 +1,8 @@
 <?php
 require_once '../includes/auth.php';
-require_login();
 require_once '../includes/db.php';
+require_once '../includes/csrf.php';
+require_login();
 include '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
@@ -31,8 +32,8 @@ if (!$transaction) {
     exit();
 }
 
-// Se já tiver avaliação
-$check = $db->prepare("SELECT * FROM reviews WHERE transaction_id = :id");
+// Verificar se já foi avaliado
+$check = $db->prepare("SELECT 1 FROM reviews WHERE transaction_id = :id");
 $check->execute([':id' => $transaction_id]);
 if ($check->fetch()) {
     echo "<main><p>Este serviço já foi avaliado.</p></main>";
@@ -45,24 +46,32 @@ $success = false;
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rating = (int) ($_POST['rating'] ?? 0);
-    $comment = trim($_POST['comment'] ?? '');
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $errors[] = "Token CSRF inválido.";
+    } else {
+        $rating = (int) ($_POST['rating'] ?? 0);
+        $comment = trim($_POST['comment'] ?? '');
 
-    if ($rating < 1 || $rating > 5) {
-        $errors[] = "A avaliação deve ser entre 1 e 5 estrelas.";
-    }
+        if ($rating < 1 || $rating > 5) {
+            $errors[] = "A avaliação deve ser entre 1 e 5 estrelas.";
+        }
 
-    if (empty($errors)) {
-        $stmt = $db->prepare("
-            INSERT INTO reviews (transaction_id, rating, comment)
-            VALUES (:tid, :rating, :comment)
-        ");
-        $stmt->execute([
-            ':tid' => $transaction_id,
-            ':rating' => $rating,
-            ':comment' => $comment
-        ]);
-        $success = true;
+        if (strlen($comment) > 1000) {
+            $errors[] = "O comentário é demasiado longo (máx. 1000 caracteres).";
+        }
+
+        if (empty($errors)) {
+            $stmt = $db->prepare("
+                INSERT INTO reviews (transaction_id, rating, comment)
+                VALUES (:tid, :rating, :comment)
+            ");
+            $stmt->execute([
+                ':tid' => $transaction_id,
+                ':rating' => $rating,
+                ':comment' => $comment
+            ]);
+            $success = true;
+        }
     }
 }
 ?>
@@ -79,11 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p style="color: green;">✅ Avaliação enviada com sucesso!</p>
     <?php else: ?>
         <form method="post">
+            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+
             <label for="rating">Classificação (1 a 5):</label>
             <input type="number" name="rating" min="1" max="5" required>
 
             <label for="comment">Comentário (opcional):</label>
-            <textarea name="comment" rows="4" placeholder="Deixa aqui o teu feedback..."></textarea>
+            <textarea name="comment" rows="4" maxlength="1000" placeholder="Deixa aqui o teu feedback..."></textarea>
 
             <button type="submit" class="primary-btn">Enviar Avaliação</button>
         </form>
