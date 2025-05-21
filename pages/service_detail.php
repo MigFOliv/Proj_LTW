@@ -112,9 +112,3 @@ if (isset($_SESSION['user_id'])) {
 
 <?php include '../includes/footer.php'; ?>
 
-<?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $service['freelancer_id']): ?>
-    <button class="primary-btn" onclick="toggleFavorite(<?= $service['id'] ?>, this)">
-        ☆ Adicionar aos Favoritos
-    </button>
-<?php endif; ?>
-

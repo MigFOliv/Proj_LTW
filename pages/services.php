@@ -66,10 +66,3 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php include '../includes/footer.php'; ?>
-<?php if (isset($_SESSION['user_id'])): ?>
-    <button class="primary-btn" onclick="toggleFavorite(<?= $s['id'] ?>, this)">
-        ☆ Adicionar aos Favoritos
-    </button>
-<?php endif; ?>
-
