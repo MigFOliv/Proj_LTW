@@ -30,6 +30,10 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <ul>
             <?php foreach ($services as $service): ?>
                 <li class="service-item">
+                    <?php if (!empty($service['media_path']) && file_exists($service['media_path'])): ?>
+                        <img src="<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
+                    <?php endif; ?>
+
                     <strong><?= htmlspecialchars($service['title']) ?></strong> –
                     <?= htmlspecialchars($service['price']) ?>€ –
                     <?= htmlspecialchars($service['delivery_time']) ?>

@@ -51,7 +51,7 @@ switch ($sort) {
         $query .= " ORDER BY avg_rating DESC NULLS LAST";
         break;
     default:
-        $query .= " ORDER BY s.id DESC"; // latest
+        $query .= " ORDER BY s.id DESC";
 }
 
 $stmt = $db->prepare($query);
@@ -99,6 +99,10 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php else: ?>
     <?php foreach ($services as $s): ?>
         <div class="service-item">
+            <?php if (!empty($s['media_path']) && file_exists($s['media_path'])): ?>
+                <img src="<?= htmlspecialchars($s['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
+            <?php endif; ?>
+
             <h3><?= htmlspecialchars($s['title']) ?></h3>
             <?php if ($s['avg_rating'] !== null): ?>
                 <p>⭐ <?= number_format($s['avg_rating'], 1) ?> / 5</p>
