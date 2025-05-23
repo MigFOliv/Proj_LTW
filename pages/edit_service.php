@@ -1,3 +1,4 @@
+
 <?php
 require_once '../includes/auth.php';
 require_once '../includes/db.php';
@@ -97,58 +98,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<?php include '../includes/head.php'; ?>
 <?php include '../includes/header.php'; ?>
 
-<h2>✏️ Editar Serviço</h2>
+<main class="dashboard-container">
+    <h2>✏️ Editar Serviço</h2>
 
-<?php foreach ($errors as $e): ?>
-    <p style="color:red"><?= htmlspecialchars($e) ?></p>
-<?php endforeach; ?>
+    <?php foreach ($errors as $e): ?>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
+    <?php endforeach; ?>
 
-<?php if ($success): ?>
-    <p style="color:green">✅ Serviço atualizado com sucesso!</p>
-<?php endif; ?>
-
-<form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-
-    <label>Título:<br>
-        <input type="text" name="title" value="<?= htmlspecialchars($service['title']) ?>" required minlength="3">
-    </label><br>
-
-    <label>Descrição:<br>
-        <textarea name="description" rows="4" required minlength="10"><?= htmlspecialchars($service['description']) ?></textarea>
-    </label><br>
-
-    <label>Preço (€):<br>
-        <input type="number" name="price" step="0.01" min="1" value="<?= htmlspecialchars($service['price']) ?>" required>
-    </label><br>
-
-    <label>Tempo de entrega:<br>
-        <input type="text" name="delivery_time" value="<?= htmlspecialchars($service['delivery_time']) ?>" required>
-    </label><br>
-
-    <label>Categoria:<br>
-        <input type="text" name="category" value="<?= htmlspecialchars($service['category']) ?>">
-    </label><br>
-
-    <label>
-        <input type="checkbox" name="is_promoted" value="1" <?= $service['is_promoted'] ? 'checked' : '' ?>>
-        ⭐ Destacar serviço na página inicial
-    </label><br>
-
-    <?php if (!empty($service['media_path']) && file_exists('../' . $service['media_path'])): ?>
-        <p><strong>Imagem atual:</strong></p>
-        <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem atual" style="max-width: 200px;"><br>
+    <?php if ($success): ?>
+        <p class="success">✅ Serviço atualizado com sucesso!</p>
     <?php endif; ?>
 
-    <label>Nova imagem (opcional):<br>
-        <input type="file" name="media" accept="image/*">
-    </label><br>
+    <form method="post" enctype="multipart/form-data" class="auth-form" style="max-width: 600px; margin: 0 auto;">
+        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-    <button type="submit">💾 Guardar alterações</button>
-</form>
+        <label>Título:
+            <input type="text" name="title" value="<?= htmlspecialchars($service['title']) ?>" required minlength="3">
+        </label>
 
-<p><a href="dashboard.php">⬅️ Voltar ao Painel</a></p>
+        <label>Descrição:
+            <textarea name="description" rows="4" required minlength="10"><?= htmlspecialchars($service['description']) ?></textarea>
+        </label>
+
+        <label>Preço (€):
+            <input type="number" name="price" step="0.01" min="1" value="<?= htmlspecialchars($service['price']) ?>" required>
+        </label>
+
+        <label>Tempo de entrega:
+            <input type="text" name="delivery_time" value="<?= htmlspecialchars($service['delivery_time']) ?>" required>
+        </label>
+
+        <label>Categoria:
+            <input type="text" name="category" value="<?= htmlspecialchars($service['category']) ?>">
+        </label>
+
+        <label>
+            <input type="checkbox" name="is_promoted" value="1" <?= $service['is_promoted'] ? 'checked' : '' ?>>
+            ⭐ Destacar serviço na página inicial
+        </label>
+
+        <?php if (!empty($service['media_path']) && file_exists('../' . $service['media_path'])): ?>
+            <p><strong>Imagem atual:</strong></p>
+            <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem atual" class="service-image">
+        <?php endif; ?>
+
+        <label>Nova imagem (opcional):
+            <input type="file" name="media" accept="image/*">
+        </label>
+
+        <button type="submit" class="primary-btn">💾 Guardar alterações</button>
+    </form>
+
+    <div class="dashboard-actions">
+        <a href="dashboard.php" class="primary-btn">⬅️ Voltar ao Painel</a>
+    </div>
+</main>
 
 <?php include '../includes/footer.php'; ?>

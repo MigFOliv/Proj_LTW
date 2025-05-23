@@ -26,11 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bio = trim($_POST['bio'] ?? '');
     $image_path = $user['profile_image'] ?? null;
 
-    // Validações básicas
     if (strlen($name) > 100) $name = substr($name, 0, 100);
     if (strlen($bio) > 1000) $bio = substr($bio, 0, 1000);
 
-    // Upload de imagem
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         $tmp_name = $_FILES['profile_image']['tmp_name'];
         $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
@@ -39,14 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (in_array($ext, $allowed)) {
             $filename = 'profile_' . $user_id . '_' . time() . '.' . $ext;
             $destination = __DIR__ . '/../uploads/profiles/' . $filename;
-
             if (move_uploaded_file($tmp_name, $destination)) {
                 $image_path = 'uploads/profiles/' . $filename;
             }
         }
     }
 
-    // Atualizar ou inserir perfil
     $stmt = $db->prepare('
         INSERT INTO profiles (user_id, name, bio, profile_image)
         VALUES (?, ?, ?, ?)
@@ -62,64 +58,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<!DOCTYPE html>
+<html lang="pt">
+<?php include(__DIR__ . '/../includes/head.php'); ?>
+<body>
 <?php include(__DIR__ . '/../includes/header.php'); ?>
 
-<?php
-$profileImg = !empty($user['profile_image']) 
-    ? htmlspecialchars($user['profile_image']) 
-    : 'uploads/profiles/default_profile.png';
-?>
-<img src="/<?= $profileImg ?>" alt="Foto de Perfil" class="profile-picture" width="150" style="border-radius: 50%;">
+<main class="dashboard-container">
+    <h2>👤 Meu Perfil</h2>
 
-<h2>Perfil</h2>
+    <?php
+    $profileImg = !empty($user['profile_image'])
+        ? htmlspecialchars($user['profile_image'])
+        : 'uploads/profiles/default_profile.png';
+    ?>
+    <img src="/<?= $profileImg ?>" alt="Foto de Perfil" class="profile-picture" width="150" style="border-radius: 50%; margin-bottom: 1rem;">
 
-<p>
-    <a href="public_profile.php?id=<?= $_SESSION['user_id'] ?>" class="primary-btn">
-        👁 Ver meu perfil público
-    </a>
-</p>
+    <p>
+        <a href="public_profile.php?id=<?= $_SESSION['user_id'] ?>" class="primary-btn">
+            👁 Ver meu perfil público
+        </a>
+    </p>
 
-<form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+    <form method="post" enctype="multipart/form-data" class="auth-form" style="max-width: 500px;">
+        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-    <label>Nome:</label>
-    <input type="text" name="name" maxlength="100" value="<?= htmlspecialchars($user['name'] ?? '') ?>">
+        <label>Nome:
+            <input type="text" name="name" maxlength="100" value="<?= htmlspecialchars($user['name'] ?? '') ?>">
+        </label>
 
-    <label>Biografia:</label>
-    <textarea name="bio" maxlength="1000"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+        <label>Biografia:
+            <textarea name="bio" maxlength="1000" rows="4"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+        </label>
 
-    <label>Foto de perfil:</label>
-    <input type="file" name="profile_image" accept="image/*">
+        <label>Foto de perfil:
+            <input type="file" name="profile_image" accept="image/*">
+        </label>
 
-    <button type="submit">Guardar Alterações</button>
-</form>
+        <button type="submit" class="primary-btn">💾 Guardar Alterações</button>
+    </form>
 
+    <h3 style="margin-top: 2rem;">📧 Informações da Conta</h3>
+    <ul class="stats-list">
+        <li><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></li>
+        <li><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></li>
+    </ul>
 
-<h3>Informações da Conta</h3>
-<ul>
-    <li><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></li>
-    <li><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></li>
-</ul>
+    <h3 style="margin-top: 2rem;">💼 Meus Serviços</h3>
+    <ul class="service-list">
+        <?php
+        $stmt = $db->prepare('SELECT id, title, price FROM services WHERE freelancer_id = ?');
+        $stmt->execute([$user_id]);
+        $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-<h3>Meus Serviços</h3>
-<ul>
-<?php
-$stmt = $db->prepare('SELECT id, title, price FROM services WHERE freelancer_id = ?');
-$stmt->execute([$user_id]);
-$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-if ($services):
-    foreach ($services as $service): ?>
-        <li>
-            <a href="service_detail.php?id=<?= $service['id'] ?>">
-                <?= htmlspecialchars($service['title']) ?> - €<?= number_format($service['price'], 2) ?>
-            </a>
-        </li>
-    <?php endforeach;
-else:
-    echo '<li>Não tens serviços publicados.</li>';
-endif;
-?>
-</ul>
+        if ($services):
+            foreach ($services as $service): ?>
+                <li>
+                    <a href="service_detail.php?id=<?= $service['id'] ?>">
+                        <?= htmlspecialchars($service['title']) ?> - €<?= number_format($service['price'], 2) ?>
+                    </a>
+                </li>
+            <?php endforeach;
+        else:
+            echo '<li class="no-services">Ainda não publicaste serviços.</li>';
+        endif;
+        ?>
+    </ul>
+</main>
 
 <?php include(__DIR__ . '/../includes/footer.php'); ?>
+</body>
+</html>

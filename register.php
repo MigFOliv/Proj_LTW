@@ -1,3 +1,4 @@
+
 <?php
 require_once 'includes/db.php';
 require_once 'includes/csrf.php';
@@ -7,17 +8,14 @@ $errors = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validar token CSRF
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Token CSRF inválido.";
     } else {
-        // Sanitizar inputs
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $confirm = $_POST['confirm_password'] ?? '';
 
-        // Validações
         if (empty($username) || empty($email) || empty($password) || empty($confirm)) {
             $errors[] = "Todos os campos são obrigatórios.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -30,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "As passwords não coincidem.";
         }
 
-        // Verificar duplicados e inserir utilizador
         if (empty($errors)) {
             $stmt = $db->prepare("SELECT id FROM users WHERE username = :username OR email = :email");
             $stmt->execute([':username' => $username, ':email' => $email]);
@@ -50,43 +47,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-require_once 'includes/header.php';
 ?>
+
+<!DOCTYPE html>
+<html lang="pt">
+<?php include 'includes/head.php'; ?>
+<body>
+
+<?php include 'includes/header.php'; ?>
 
 <main class="auth-container">
     <h2>📝 Registar Conta</h2>
 
     <?php foreach ($errors as $e): ?>
-        <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
     <?php endforeach; ?>
 
     <?php if ($success): ?>
-        <p style="color: green;">Conta criada com sucesso! <a href="login.php">Iniciar sessão</a></p>
+        <p class="success">Conta criada com sucesso! <a href="login.php">Iniciar sessão</a></p>
     <?php else: ?>
-        <form method="post">
+        <form method="post" class="auth-form">
             <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-            <label>Utilizador:
+            <label>
+                Utilizador:
                 <input type="text" name="username" required minlength="3" maxlength="50">
             </label>
 
-            <label>Email:
+            <label>
+                Email:
                 <input type="email" name="email" required>
             </label>
 
-            <label>Password:
+            <label>
+                Password:
                 <input type="password" name="password" required minlength="6">
             </label>
 
-            <label>Confirmar Password:
+            <label>
+                Confirmar Password:
                 <input type="password" name="confirm_password" required minlength="6">
             </label>
 
             <button type="submit" class="primary-btn">Criar Conta</button>
         </form>
-        <p style="text-align: center;">Já tens conta? <a href="login.php">Inicia sessão</a></p>
+
+        <p class="auth-footer">Já tens conta? <a href="login.php">Inicia sessão</a></p>
     <?php endif; ?>
 </main>
 
 <?php include 'includes/footer.php'; ?>
+</body>
+</html>

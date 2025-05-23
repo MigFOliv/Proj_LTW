@@ -3,13 +3,15 @@ require_once '../includes/auth.php';
 require_once '../includes/db.php';
 require_once '../includes/csrf.php';
 require_login();
-include '../includes/header.php';
+
+require_once '../includes/head.php';
+require_once '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 
 // Validar ID da transação
 if (!isset($_GET['transaction']) || !is_numeric($_GET['transaction'])) {
-    echo "<main><p>Transação inválida.</p></main>";
+    echo "<main class='dashboard-container'><p class='error'>❌ Transação inválida.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -27,7 +29,7 @@ $stmt->execute([':id' => $transaction_id, ':uid' => $user_id]);
 $transaction = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$transaction) {
-    echo "<main><p>Esta transação não existe, não pertence a ti, ou ainda não foi concluída.</p></main>";
+    echo "<main class='dashboard-container'><p class='error'>❌ Esta transação não existe, não pertence a ti ou ainda não foi concluída.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -36,7 +38,7 @@ if (!$transaction) {
 $check = $db->prepare("SELECT 1 FROM reviews WHERE transaction_id = :id");
 $check->execute([':id' => $transaction_id]);
 if ($check->fetch()) {
-    echo "<main><p>Este serviço já foi avaliado.</p></main>";
+    echo "<main class='dashboard-container'><p class='error'>❌ Este serviço já foi avaliado.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -76,31 +78,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<main>
+<main class="dashboard-container">
     <h2>⭐ Avaliar Serviço</h2>
     <p><strong><?= htmlspecialchars($transaction['title']) ?></strong></p>
 
     <?php foreach ($errors as $e): ?>
-        <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
     <?php endforeach; ?>
 
     <?php if ($success): ?>
-        <p style="color: green;">✅ Avaliação enviada com sucesso!</p>
+        <p class="success">✅ Avaliação enviada com sucesso!</p>
     <?php else: ?>
-        <form method="post">
+        <form method="post" class="auth-form" style="max-width: 600px;">
             <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-            <label for="rating">Classificação (1 a 5):</label>
-            <input type="number" name="rating" min="1" max="5" required>
+            <label for="rating">Classificação (1 a 5):
+                <input type="number" name="rating" min="1" max="5" required>
+            </label>
 
-            <label for="comment">Comentário (opcional):</label>
-            <textarea name="comment" rows="4" maxlength="1000" placeholder="Deixa aqui o teu feedback..."></textarea>
+            <label for="comment">Comentário (opcional):
+                <textarea name="comment" rows="4" maxlength="1000" placeholder="Deixa aqui o teu feedback..."></textarea>
+            </label>
 
-            <button type="submit" class="primary-btn">Enviar Avaliação</button>
+            <button type="submit" class="primary-btn">💬 Enviar Avaliação</button>
         </form>
     <?php endif; ?>
 
-    <p><a href="my_orders.php">⬅️ Voltar aos meus pedidos</a></p>
+    <div class="dashboard-actions">
+        <a href="my_orders.php" class="primary-btn">⬅️ Voltar aos meus pedidos</a>
+    </div>
 </main>
 
 <?php include '../includes/footer.php'; ?>

@@ -1,16 +1,14 @@
 <?php
 require_once '../includes/db.php';
-require_once '../includes/header.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    echo "<main><p>ID de utilizador inválido.</p></main>";
-    include '../includes/footer.php';
+    echo "<main class='dashboard-container'><p>ID de utilizador inválido.</p></main>";
     exit();
 }
 
 $user_id = (int) $_GET['id'];
 
-// Buscar dados do perfil
+// Obter perfil
 $stmt = $db->prepare("
     SELECT u.username, p.name, p.bio, p.profile_image
     FROM users u
@@ -21,38 +19,44 @@ $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
-    echo "<main><p>Perfil não encontrado.</p></main>";
-    include '../includes/footer.php';
+    echo "<main class='dashboard-container'><p>Perfil não encontrado.</p></main>";
     exit();
 }
 
-// Buscar serviços do freelancer
+// Serviços
 $stmt = $db->prepare("SELECT id, title, price FROM services WHERE freelancer_id = ?");
 $stmt->execute([$user_id]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Imagem
+$imgPath = !empty($user['profile_image']) && file_exists('../' . $user['profile_image'])
+    ? '/' . htmlspecialchars($user['profile_image'])
+    : '/uploads/profiles/default_profile.png';
 ?>
 
-<main>
+<!DOCTYPE html>
+<html lang="pt">
+<?php include '../includes/head.php'; ?>
+<body>
+<?php include '../includes/header.php'; ?>
+
+<main class="dashboard-container">
     <h2>👤 Perfil Público</h2>
 
-    <?php
-    $imgPath = !empty($user['profile_image']) && file_exists('../' . $user['profile_image'])
-        ? '/' . htmlspecialchars($user['profile_image'])
-        : '/uploads/profiles/default_profile.png';
-    ?>
-
-    <img src="<?= $imgPath ?>" alt="Foto de perfil" width="150" style="border-radius: 50%; margin-bottom: 1rem;">
+    <img src="<?= $imgPath ?>" alt="Foto de perfil" class="profile-picture" width="150" style="border-radius: 50%; margin-bottom: 1rem;">
 
     <h3><?= htmlspecialchars($user['name'] ?? $user['username']) ?></h3>
-    <p><?= nl2br(htmlspecialchars($user['bio'] ?? '')) ?></p>
+    <?php if (!empty($user['bio'])): ?>
+        <p style="max-width: 600px; margin-bottom: 1rem;"><?= nl2br(htmlspecialchars($user['bio'])) ?></p>
+    <?php endif; ?>
 
-    <hr>
+    <hr style="margin: 2rem 0;">
     <h4>🛠 Serviços publicados</h4>
 
     <?php if (count($services) === 0): ?>
-        <p>Este utilizador ainda não publicou nenhum serviço.</p>
+        <p class="no-services">Este utilizador ainda não publicou nenhum serviço.</p>
     <?php else: ?>
-        <ul>
+        <ul class="service-list">
             <?php foreach ($services as $s): ?>
                 <li>
                     <a href="service_detail.php?id=<?= $s['id'] ?>">
@@ -63,7 +67,11 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </ul>
     <?php endif; ?>
 
-    <p><a href="services.php">⬅️ Voltar</a></p>
+    <p style="margin-top: 2rem;">
+        <a href="services.php" class="primary-btn">⬅️ Voltar aos Serviços</a>
+    </p>
 </main>
 
 <?php include '../includes/footer.php'; ?>
+</body>
+</html>

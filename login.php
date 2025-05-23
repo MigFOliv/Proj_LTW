@@ -1,3 +1,4 @@
+
 <?php
 require_once 'includes/db.php';
 require_once 'includes/csrf.php';
@@ -6,7 +7,6 @@ session_start();
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Valida token CSRF
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Token CSRF inválido.";
     } else {
@@ -32,32 +32,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-require_once 'includes/header.php';
 ?>
+
+<!DOCTYPE html>
+<html lang="pt">
+<?php include 'includes/head.php'; ?>
+<body>
+
+<?php include 'includes/header.php'; ?>
 
 <main class="auth-container">
     <h2>🔐 Iniciar Sessão</h2>
 
     <?php foreach ($errors as $e): ?>
-        <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
     <?php endforeach; ?>
 
-    <form method="post">
+    <form method="post" class="auth-form">
         <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-        <label>Utilizador:
+        <label>
+            Utilizador:
             <input type="text" name="username" required>
         </label>
 
-        <label>Password:
+        <label>
+            Password:
             <input type="password" name="password" required>
         </label>
 
         <button type="submit" class="primary-btn">Entrar</button>
     </form>
 
-    <p style="text-align: center;">Ainda não tens conta? <a href="register.php">Regista-te aqui</a></p>
+    <p class="auth-footer">Ainda não tens conta? <a href="register.php">Regista-te aqui</a></p>
 </main>
 
 <?php include 'includes/footer.php'; ?>
+</body>
+</html>

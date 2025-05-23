@@ -1,13 +1,18 @@
-
 <?php
 require_once '../includes/auth.php';
 require_login();
 require_once '../includes/db.php';
-include '../includes/header.php';
+?>
 
+<!DOCTYPE html>
+<html lang="pt">
+<?php include '../includes/head.php'; ?>
+<body>
+<?php include '../includes/header.php'; ?>
+
+<?php
 $user_id = $_SESSION['user_id'];
 
-// Buscar serviços contratados pelo cliente
 $stmt = $db->prepare("
     SELECT t.*, s.title, s.freelancer_id, u.username AS freelancer_name
     FROM transactions t
@@ -20,37 +25,35 @@ $stmt->execute([':uid' => $user_id]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<main>
+<main class="dashboard-container">
     <h2>🛒 Meus Serviços Contratados</h2>
 
     <?php if (count($orders) === 0): ?>
-        <p>Ainda não contrataste nenhum serviço.</p>
+        <p class="no-services">Ainda não contrataste nenhum serviço.</p>
     <?php else: ?>
-        <ul>
+        <ul class="service-list">
             <?php foreach ($orders as $order): ?>
                 <li class="service-item">
-                    <strong><?= htmlspecialchars($order['title']) ?></strong><br>
-                    <small>
-                        Freelancer: <?= htmlspecialchars($order['freelancer_name']) ?>
+                    <h4><?= htmlspecialchars($order['title']) ?></h4>
+                    <p>
+                        <strong>Freelancer:</strong>
+                        <?= htmlspecialchars($order['freelancer_name']) ?>
                         (<a href="public_profile.php?id=<?= $order['freelancer_id'] ?>">👤 Ver perfil</a>)
-                    </small><br>
-                    <small>Data: <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></small><br>
-                    <small>Estado: <strong><?= ucfirst($order['status']) ?></strong></small><br><br>
+                    </p>
+                    <p><strong>Data:</strong> <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
+                    <p><strong>Estado:</strong> <?= ucfirst(htmlspecialchars($order['status'])) ?></p>
 
                     <?php if ($order['status'] === 'completed'): ?>
                         <?php
-                        // Verificar se já foi avaliado
                         $check = $db->prepare("SELECT 1 FROM reviews WHERE transaction_id = :tid");
                         $check->execute([':tid' => $order['id']]);
                         $alreadyReviewed = $check->fetchColumn();
                         ?>
 
                         <?php if (!$alreadyReviewed): ?>
-                            <a href="service_review.php?transaction=<?= $order['id'] ?>">
-                                <button class="primary-btn">⭐ Avaliar Serviço</button>
-                            </a>
+                            <a href="service_review.php?transaction=<?= $order['id'] ?>" class="primary-btn">⭐ Avaliar Serviço</a>
                         <?php else: ?>
-                            <p style="color: green;">✅ Já avaliado</p>
+                            <p class="success">✅ Já avaliado</p>
                         <?php endif; ?>
                     <?php endif; ?>
                 </li>
@@ -60,3 +63,5 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </main>
 
 <?php include '../includes/footer.php'; ?>
+</body>
+</html>

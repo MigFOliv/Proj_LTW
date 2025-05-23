@@ -2,8 +2,17 @@
 require_once '../includes/auth.php';
 require_once '../includes/db.php';
 require_login();
-include '../includes/header.php';
+?>
 
+<!DOCTYPE html>
+<html lang="pt">
+<?php include '../includes/head.php'; ?>
+<!-- Adiciona Chart.js no head.php ou aqui -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<body>
+<?php include '../includes/header.php'; ?>
+
+<?php
 $user_id = $_SESSION['user_id'];
 
 // Total de serviços
@@ -43,16 +52,61 @@ $stmt->execute([$user_id]);
 $average = $stmt->fetchColumn();
 ?>
 
-<main>
+<main class="dashboard-container">
     <h2>📈 As Minhas Estatísticas</h2>
-    <ul>
+
+    <ul class="stats-list">
         <li><strong>Total de serviços publicados:</strong> <?= $total_services ?></li>
         <li><strong>Pedidos recebidos:</strong> <?= $total_orders ?></li>
         <li><strong>Pedidos concluídos:</strong> <?= $completed ?></li>
         <li><strong>Média de avaliações:</strong> <?= $average ? number_format($average, 1) . " / 5 ⭐" : 'Sem avaliações ainda' ?></li>
     </ul>
 
-    <p><a href="dashboard.php">⬅️ Voltar ao Painel</a></p>
+    <div style="max-width: 600px; margin: 2rem auto;">
+        <canvas id="statsChart" width="400" height="200"></canvas>
+    </div>
+
+    <div class="dashboard-actions">
+        <a href="dashboard.php" class="primary-btn">⬅️ Voltar ao Painel</a>
+    </div>
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<script>
+const ctx = document.getElementById('statsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Serviços', 'Pedidos Recebidos', 'Pedidos Concluídos'],
+        datasets: [{
+            label: 'Totais',
+            data: [<?= $total_services ?>, <?= $total_orders ?>, <?= $completed ?>],
+            backgroundColor: ['#0070f3', '#00c853', '#ff6d00'],
+            borderRadius: 10
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#000',
+                titleColor: '#fff',
+                bodyColor: '#fff'
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>
+

@@ -1,10 +1,11 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/csrf.php';
+require_once '../includes/head.php';
 require_once '../includes/header.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    echo "<p>ID inválido.</p>";
+    echo "<main class='dashboard-container'><p>ID inválido.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -16,7 +17,7 @@ $stmt->execute([':id' => $id]);
 $service = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$service) {
-    echo "<p>Serviço não encontrado.</p>";
+    echo "<main class='dashboard-container'><p>Serviço não encontrado.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -33,50 +34,48 @@ if (isset($_SESSION['user_id'])) {
 }
 ?>
 
-<main>
+<main class="dashboard-container">
     <h2>🔍 Detalhes do Serviço</h2>
 
     <?php if (isset($_GET['hired'])): ?>
-        <p style="color: green;">✅ Serviço contratado com sucesso!</p>
+        <p class="success">✅ Serviço contratado com sucesso!</p>
     <?php endif; ?>
 
     <div class="service-item">
         <?php
         $imgPath = '../' . $service['media_path'];
         if (!empty($service['media_path']) && file_exists($imgPath)): ?>
-            <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
+            <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" class="service-image">
         <?php endif; ?>
 
-        <h3><?= htmlspecialchars($service['title']) ?></h3>
-        <p><em><?= htmlspecialchars($service['description']) ?></em></p>
+        <h4><?= htmlspecialchars($service['title']) ?></h4>
+        <p class="description"><?= nl2br(htmlspecialchars($service['description'])) ?></p>
         <p><strong><?= htmlspecialchars($service['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($service['delivery_time']) ?></p>
         <p><small>
             Por <strong><?= htmlspecialchars($service['username']) ?></strong>
             (<a href="public_profile.php?id=<?= $service['freelancer_id'] ?>">👤 Ver perfil</a>)
-            • Categoria: <?= htmlspecialchars($service['category']) ?>
+            • Categoria: <?= htmlspecialchars($service['category'] ?? '—') ?>
         </small></p>
     </div>
 
     <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $service['freelancer_id']): ?>
-        <p>
-            <a href="contact_freelancer.php?to=<?= $service['freelancer_id'] ?>&service=<?= $service['id'] ?>">
-                <button class="primary-btn">💬 Contactar Freelancer</button>
-            </a>
-        </p>
-        <p>
-            <a href="hire_service.php?service=<?= $service['id'] ?>">
-                <button class="primary-btn">🛒 Contratar Serviço</button>
-            </a>
-        </p>
+        <div class="service-actions">
+            <a href="contact_freelancer.php?to=<?= $service['freelancer_id'] ?>&service=<?= $service['id'] ?>" class="primary-btn">💬 Contactar Freelancer</a>
 
-        <!-- Botão de Favorito seguro -->
-        <form action="toggle_favorite.php" method="post" style="display: inline;">
-            <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
-            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-            <button type="submit" class="primary-btn">
-                <?= $isFavorite ? '💔 Remover dos Favoritos' : '❤️ Adicionar aos Favoritos' ?>
-            </button>
-        </form>
+            <form action="hire_service.php" method="post" class="inline-form">
+                <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                <button type="submit" class="primary-btn">🛒 Contratar Serviço</button>
+            </form>
+
+            <form action="toggle_favorite.php" method="post" class="inline-form">
+                <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                <button type="submit" class="primary-btn">
+                    <?= $isFavorite ? '💔 Remover dos Favoritos' : '❤️ Adicionar aos Favoritos' ?>
+                </button>
+            </form>
+        </div>
     <?php endif; ?>
 
     <hr>
@@ -102,20 +101,22 @@ if (isset($_SESSION['user_id'])) {
     <?php endif; ?>
 
     <?php if (count($reviews) > 0): ?>
-        <ul>
+        <ul class="service-list">
             <?php foreach ($reviews as $r): ?>
                 <li class="service-item">
                     <strong>⭐ <?= $r['rating'] ?>/5</strong> — por <em><?= htmlspecialchars($r['username']) ?></em><br>
                     <small><?= date('d/m/Y', strtotime($r['completed_at'])) ?></small>
                     <?php if (!empty($r['comment'])): ?>
-                        <p><?= htmlspecialchars($r['comment']) ?></p>
+                        <p><?= nl2br(htmlspecialchars($r['comment'])) ?></p>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>
 
-    <p><a href="services.php">⬅️ Voltar à lista</a></p>
+    <div class="dashboard-actions">
+        <a href="services.php" class="primary-btn">⬅️ Voltar à lista</a>
+    </div>
 </main>
 
 <?php include '../includes/footer.php'; ?>

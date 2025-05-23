@@ -3,11 +3,10 @@ require_once '../includes/auth.php';
 require_once '../includes/db.php';
 require_once '../includes/csrf.php';
 require_login();
-include '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Serviços favoritos do utilizador
+// Obter serviços favoritos
 $stmt = $db->prepare("
     SELECT s.*, u.username, u.id AS freelancer_id
     FROM favorites f
@@ -20,38 +19,51 @@ $stmt->execute([':uid' => $user_id]);
 $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<main>
-<h2>⭐ Serviços Favoritos</h2>
+<!DOCTYPE html>
+<html lang="pt">
+<?php include '../includes/head.php'; ?>
+<body>
+<?php include '../includes/header.php'; ?>
 
-<?php if (count($favorites) === 0): ?>
-    <p>Não tens serviços favoritos de momento.</p>
-<?php else: ?>
-    <?php foreach ($favorites as $s): ?>
-        <div class="service-item">
-            <?php
-                $imgPath = '../' . $s['media_path'];
-                if (!empty($s['media_path']) && file_exists($imgPath)):
-            ?>
-                <img src="/<?= htmlspecialchars($s['media_path']) ?>" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">
-            <?php endif; ?>
+<main class="dashboard-container">
+  <h2>⭐ Serviços Favoritos</h2>
 
-            <h3><?= htmlspecialchars($s['title']) ?></h3>
-            <p><em><?= htmlspecialchars($s['description']) ?></em></p>
-            <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
-            <p><small>
-                Por <strong><?= htmlspecialchars($s['username']) ?></strong>
-                (<a href="public_profile.php?id=<?= $s['freelancer_id'] ?>">👤 Ver perfil</a>)
-                • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?>
-            </small></p>
+  <?php if (count($favorites) === 0): ?>
+    <p class="no-services">Não tens serviços favoritos de momento.</p>
+  <?php else: ?>
+    <ul class="service-list">
+      <?php foreach ($favorites as $s): ?>
+        <li class="service-item">
+          <?php
+            $imgPath = '../' . $s['media_path'];
+            if (!empty($s['media_path']) && file_exists($imgPath)):
+          ?>
+            <img src="/<?= htmlspecialchars($s['media_path']) ?>" alt="Imagem do serviço" class="service-image">
+          <?php endif; ?>
 
-            <form method="post" action="toggle_favorite.php" style="display:inline;" onsubmit="return confirm('Remover dos favoritos?');">
-                <input type="hidden" name="service_id" value="<?= $s['id'] ?>">
-                <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-                <button type="submit" class="danger-btn">❌ Remover dos Favoritos</button>
+          <h4><?= htmlspecialchars($s['title']) ?></h4>
+          <p class="description"><?= htmlspecialchars($s['description']) ?></p>
+          <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
+          <p><small>
+            Por <strong><?= htmlspecialchars($s['username']) ?></strong>
+            (<a href="public_profile.php?id=<?= $s['freelancer_id'] ?>">👤 Ver perfil</a>)
+            • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?>
+          </small></p>
+
+          <div class="service-actions">
+            <form method="post" action="toggle_favorite.php" class="inline-form" onsubmit="return confirm('Remover dos favoritos?');">
+              <input type="hidden" name="service_id" value="<?= $s['id'] ?>">
+              <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+              <button type="submit" class="danger-btn">❌ Remover dos Favoritos</button>
             </form>
-        </div>
-    <?php endforeach; ?>
-<?php endif; ?>
+          </div>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  <?php endif; ?>
 </main>
 
 <?php include '../includes/footer.php'; ?>
+</body>
+</html>
+

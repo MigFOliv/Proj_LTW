@@ -18,12 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = trim($_POST['category'] ?? '');
         $mediaPath = null;
 
-        // Validação de dados
         if (strlen($title) < 3 || strlen($description) < 10 || $price <= 0 || strlen($delivery) < 3) {
             $errors[] = "Todos os campos obrigatórios devem ser preenchidos corretamente.";
         }
 
-        // Validação e upload de imagem
         if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
             $tmp = $_FILES['media']['tmp_name'];
             $type = mime_content_type($tmp);
@@ -44,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Inserir serviço
         if (empty($errors)) {
             $stmt = $db->prepare("INSERT INTO services (freelancer_id, title, description, price, delivery_time, category, media_path)
                                   VALUES (:fid, :title, :desc, :price, :delivery, :cat, :media)");
@@ -63,48 +60,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<!DOCTYPE html>
+<html lang="pt">
+<?php include '../includes/head.php'; ?>
+<body>
 <?php include '../includes/header.php'; ?>
 
-<h2>➕ Criar Novo Serviço</h2>
+<main class="dashboard-container">
+    <h2>➕ Criar Novo Serviço</h2>
 
-<?php foreach ($errors as $e): ?>
-    <p style="color: red;"><?= htmlspecialchars($e) ?></p>
-<?php endforeach; ?>
+    <?php foreach ($errors as $e): ?>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
+    <?php endforeach; ?>
 
-<?php if ($success): ?>
-    <p style="color: green;">✅ Serviço criado com sucesso!</p>
-<?php endif; ?>
+    <?php if ($success): ?>
+        <p class="success">✅ Serviço criado com sucesso!</p>
+    <?php endif; ?>
 
-<form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+    <form method="post" enctype="multipart/form-data" class="auth-form" style="max-width: 600px; margin: 2rem auto;">
+        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
-    <label>Título:<br>
-        <input type="text" name="title" required minlength="3" maxlength="100">
-    </label><br><br>
+        <label>Título:
+            <input type="text" name="title" required minlength="3" maxlength="100">
+        </label>
 
-    <label>Descrição:<br>
-        <textarea name="description" rows="4" required minlength="10"></textarea>
-    </label><br><br>
+        <label>Descrição:
+            <textarea name="description" rows="4" required minlength="10"></textarea>
+        </label>
 
-    <label>Preço (€):<br>
-        <input type="number" name="price" step="0.01" required min="1">
-    </label><br><br>
+        <label>Preço (€):
+            <input type="number" name="price" step="0.01" required min="1">
+        </label>
 
-    <label>Tempo de entrega:<br>
-        <input type="text" name="delivery_time" placeholder="ex: 3 dias" required>
-    </label><br><br>
+        <label>Tempo de entrega:
+            <input type="text" name="delivery_time" placeholder="ex: 3 dias" required>
+        </label>
 
-    <label>Categoria (texto livre):<br>
-        <input type="text" name="category" maxlength="50">
-    </label><br><br>
+        <label>Categoria (texto livre):
+            <input type="text" name="category" maxlength="50">
+        </label>
 
-    <label>Imagem do serviço:<br>
-        <input type="file" name="media" accept="image/*">
-    </label><br><br>
+        <label>Imagem do serviço:
+            <input type="file" name="media" accept="image/*">
+        </label>
 
-    <button type="submit">Criar Serviço</button>
-</form>
+        <button type="submit" class="primary-btn">Criar Serviço</button>
+    </form>
 
-<p><a href="dashboard.php">⬅️ Voltar ao painel</a></p>
+    <p style="text-align: center;"><a href="dashboard.php">⬅️ Voltar ao painel</a></p>
+</main>
 
 <?php include '../includes/footer.php'; ?>
+</body>
+</html>
+

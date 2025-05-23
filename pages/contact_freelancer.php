@@ -3,18 +3,21 @@ require_once '../includes/auth.php';
 require_once '../includes/db.php';
 require_once '../includes/csrf.php';
 require_login();
-include '../includes/header.php';
+?>
 
+<?php include '../includes/head.php'; ?>
+<?php include '../includes/header.php'; ?>
+
+<?php
 $freelancer_id = $_GET['to'] ?? null;
 $service_id = $_GET['service'] ?? null;
 
 if (!$freelancer_id || !$service_id || $freelancer_id == $_SESSION['user_id'] || !is_numeric($freelancer_id) || !is_numeric($service_id)) {
-    echo "<p>Parâmetros inválidos.</p>";
+    echo "<main class='dashboard-container'><p>Parâmetros inválidos.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Obter info do freelancer e serviço
 $stmt = $db->prepare("
     SELECT s.title, u.username 
     FROM services s 
@@ -25,7 +28,7 @@ $stmt->execute([':sid' => $service_id, ':fid' => $freelancer_id]);
 $info = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$info) {
-    echo "<p>Serviço ou utilizador não encontrado.</p>";
+    echo "<main class='dashboard-container'><p>Serviço ou utilizador não encontrado.</p></main>";
     include '../includes/footer.php';
     exit();
 }
@@ -61,28 +64,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<main>
+<main class="dashboard-container">
     <h2>💬 Contactar <?= htmlspecialchars($info['username']) ?></h2>
     <p>Sobre o serviço: <strong><?= htmlspecialchars($info['title']) ?></strong></p>
 
     <?php foreach ($errors as $e): ?>
-        <p style="color: red;"><?= htmlspecialchars($e) ?></p>
+        <p class="error"><?= htmlspecialchars($e) ?></p>
     <?php endforeach; ?>
 
     <?php if ($success): ?>
-        <p style="color: green;">Mensagem enviada com sucesso!</p>
+        <p class="success">✅ Mensagem enviada com sucesso!</p>
     <?php else: ?>
-        <form method="post">
+        <form method="post" class="auth-form">
             <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
 
             <label>Mensagem:
-                <textarea name="message" rows="4" required maxlength="1000"></textarea>
+                <textarea name="message" rows="4" required maxlength="1000" placeholder="Escreve a tua mensagem..."></textarea>
             </label>
-            <button type="submit" class="primary-btn">Enviar</button>
+
+            <button type="submit" class="primary-btn">📨 Enviar</button>
         </form>
     <?php endif; ?>
 
-    <p><a href="service_detail.php?id=<?= htmlspecialchars($service_id) ?>">⬅️ Voltar ao serviço</a></p>
+    <div class="dashboard-actions">
+        <a href="service_detail.php?id=<?= htmlspecialchars($service_id) ?>" class="primary-btn">⬅️ Voltar ao serviço</a>
+    </div>
 </main>
 
 <?php include '../includes/footer.php'; ?>
