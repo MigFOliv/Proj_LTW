@@ -1,6 +1,5 @@
 <?php
 require_once '../includes/db.php';
-require_once '../includes/header.php';
 
 // Obter categorias distintas
 $categoriesStmt = $db->query("SELECT DISTINCT category FROM services WHERE category IS NOT NULL AND category != ''");
@@ -17,6 +16,7 @@ $sort = $_GET['sort'] ?? 'latest';
 <html lang="pt">
 <?php include '../includes/head.php'; ?>
 <body>
+<?php include '../includes/header.php'; ?>
 
 <main class="services-page">
     <h2>🌐 Todos os Serviços Disponíveis</h2>

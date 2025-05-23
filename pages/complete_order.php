@@ -2,21 +2,29 @@
 require_once '../includes/auth.php';
 require_once '../includes/db.php';
 require_once '../includes/csrf.php';
+require_once '../includes/head.php';
+require_once '../includes/header.php';
 require_login();
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Requisição inválida.");
-}
-
-if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-    die("Token CSRF inválido.");
-}
 
 $user_id = $_SESSION['user_id'];
 $transaction_id = $_POST['transaction'] ?? null;
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo "<main class='dashboard-container'><p class='error'>❌ Requisição inválida.</p></main>";
+    include '../includes/footer.php';
+    exit();
+}
+
+if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    echo "<main class='dashboard-container'><p class='error'>❌ Token CSRF inválido.</p></main>";
+    include '../includes/footer.php';
+    exit();
+}
+
 if (!$transaction_id || !is_numeric($transaction_id)) {
-    die("Pedido inválido.");
+    echo "<main class='dashboard-container'><p class='error'>❌ Pedido inválido.</p></main>";
+    include '../includes/footer.php';
+    exit();
 }
 
 // Verifica se a transação pertence a um serviço do freelancer autenticado
@@ -30,16 +38,25 @@ $stmt->execute([':tid' => $transaction_id]);
 $transaction = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$transaction || $transaction['freelancer_id'] != $user_id) {
-    die("Acesso não autorizado.");
+    echo "<main class='dashboard-container'><p class='error'>❌ Acesso não autorizado.</p></main>";
+    include '../includes/footer.php';
+    exit();
 }
 
-// Atualizar o estado para 'completed'
+// Atualiza o estado para 'completed'
 $update = $db->prepare("
     UPDATE transactions
     SET status = 'completed', completed_at = CURRENT_TIMESTAMP
     WHERE id = :tid
 ");
 $update->execute([':tid' => $transaction_id]);
+?>
 
-header("Location: my_requests.php");
-exit();
+<main class="dashboard-container">
+    <p class="success">✅ Pedido marcado como concluído com sucesso.</p>
+    <div class="dashboard-actions">
+        <a href="my_requests.php" class="primary-btn">⬅️ Voltar aos Pedidos</a>
+    </div>
+</main>
+
+<?php include '../includes/footer.php'; ?>

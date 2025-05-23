@@ -1,14 +1,11 @@
 <?php
 require_once '../includes/db.php';
 
-header('Content-Type: text/html; charset=UTF-8');
-
 $selectedCategory = $_GET['category'] ?? '';
 $minPrice = $_GET['min_price'] ?? '';
 $maxPrice = $_GET['max_price'] ?? '';
 $sort = $_GET['sort'] ?? 'latest';
 
-// Limitar valores aceites para sort
 $allowedSort = ['latest', 'price_asc', 'price_desc', 'rating'];
 if (!in_array($sort, $allowedSort)) {
     $sort = 'latest';
@@ -48,7 +45,7 @@ switch ($sort) {
         $query .= " ORDER BY s.price DESC";
         break;
     case 'rating':
-        $query .= " ORDER BY avg_rating DESC NULLS LAST";
+        $query .= " ORDER BY avg_rating DESC";
         break;
     default:
         $query .= " ORDER BY s.id DESC";
@@ -58,25 +55,28 @@ $stmt = $db->prepare($query);
 $stmt->execute($params);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if (count($services) === 0) {
-    echo "<p>Não há serviços disponíveis de momento.</p>";
-} else {
-    foreach ($services as $s) {
-        echo '<div class="service-item">';
-        
-        $imgPath = '../' . $s['media_path'];
-        if (!empty($s['media_path']) && file_exists($imgPath)) {
-            echo '<img src="/' . htmlspecialchars($s['media_path']) . '" alt="Imagem do serviço" style="max-width: 100%; margin-bottom: 10px;">';
-        }
+if (count($services) === 0): ?>
+    <p class="no-services">🚫 Não há serviços disponíveis de momento.</p>
+<?php else: ?>
+    <?php foreach ($services as $s): ?>
+        <div class="service-card">
+            <?php
+            $imgPath = '../' . $s['media_path'];
+            if (!empty($s['media_path']) && file_exists($imgPath)):
+            ?>
+                <img src="/<?= htmlspecialchars($s['media_path']) ?>" alt="Imagem do serviço" class="card-image">
+            <?php endif; ?>
 
-        echo '<h3>' . htmlspecialchars($s['title']) . '</h3>';
-        if ($s['avg_rating'] !== null) {
-            echo '<p>⭐ ' . number_format($s['avg_rating'], 1) . ' / 5</p>';
-        }
-        echo '<p><em>' . htmlspecialchars($s['description']) . '</em></p>';
-        echo '<p><strong>' . htmlspecialchars($s['price']) . '€</strong> • Entrega: ' . htmlspecialchars($s['delivery_time']) . '</p>';
-        echo '<p><small>Por <strong>' . htmlspecialchars($s['username']) . '</strong> • Categoria: ' . htmlspecialchars($s['category'] ?? '—') . '</small></p>';
-        echo '<a href="service_detail.php?id=' . (int)$s['id'] . '"><button class="primary-btn">🔍 Ver mais</button></a>';
-        echo '</div>';
-    }
-}
+            <h4><?= htmlspecialchars($s['title']) ?></h4>
+
+            <?php if ($s['avg_rating'] !== null): ?>
+                <p>⭐ <?= number_format($s['avg_rating'], 1) ?> / 5</p>
+            <?php endif; ?>
+
+            <p class="description"><?= htmlspecialchars($s['description']) ?></p>
+            <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
+            <p><small>Por <strong><?= htmlspecialchars($s['username']) ?></strong> • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?></small></p>
+            <a href="service_detail.php?id=<?= $s['id'] ?>" class="primary-btn">🔍 Ver mais</a>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
