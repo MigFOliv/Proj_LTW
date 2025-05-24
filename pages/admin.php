@@ -14,7 +14,6 @@ if ($_SESSION['is_admin'] != 1) {
 
 $message = '';
 
-// Promoção a admin
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['promote_id'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) die("Token CSRF inválido.");
 
@@ -26,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['promote_id'])) {
     }
 }
 
-// Aprovar/reprovar serviço
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['service_action'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) die("Token CSRF inválido.");
 
@@ -40,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['service_action'])) {
     }
 }
 
-// Dados
+
 $users = $db->query("SELECT id, username, email, is_admin FROM users ORDER BY username ASC")->fetchAll(PDO::FETCH_ASSOC);
 $totalUsers = $db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalPostedServices = $db->query("SELECT COUNT(*) FROM services WHERE status = 'aprovado'")->fetchColumn();

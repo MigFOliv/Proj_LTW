@@ -30,7 +30,6 @@ if (!$service_id || !is_numeric($service_id)) {
     exit();
 }
 
-// Obter dados do serviço
 $stmt = $db->prepare("SELECT * FROM services WHERE id = :id");
 $stmt->execute([':id' => $service_id]);
 $service = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -46,8 +45,6 @@ if ($service['freelancer_id'] == $user_id) {
     include '../includes/footer.php';
     exit();
 }
-
-// Verificar se já existe transação pendente
 $check = $db->prepare("
     SELECT id FROM transactions
     WHERE client_id = :cid AND service_id = :sid AND status = 'pending'
@@ -55,7 +52,6 @@ $check = $db->prepare("
 $check->execute([':cid' => $user_id, ':sid' => $service_id]);
 
 if (!$check->fetch()) {
-    // Criar nova transação com valor e moeda atual do serviço
     $stmt = $db->prepare("
         INSERT INTO transactions (client_id, service_id, amount, currency)
         VALUES (:cid, :sid, :amount, :currency)

@@ -9,14 +9,12 @@ require_login();
 $user_id = $_SESSION['user_id'];
 $service_id = $_POST['service_id'] ?? null;
 
-// Verifica se é POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "<main class='dashboard-container'><p class='error'>❌ Requisição inválida.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Verifica CSRF
 if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
     echo "<main class='dashboard-container'><p class='error'>❌ Token CSRF inválido.</p></main>";
     include '../includes/footer.php';
@@ -29,7 +27,6 @@ if (!$service_id || !is_numeric($service_id)) {
     exit();
 }
 
-// Verifica se já está nos favoritos
 $stmt = $db->prepare("SELECT 1 FROM favorites WHERE user_id = :uid AND service_id = :sid");
 $stmt->execute([
     ':uid' => $user_id,

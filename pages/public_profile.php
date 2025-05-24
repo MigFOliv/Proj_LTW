@@ -8,7 +8,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $user_id = (int) $_GET['id'];
 
-// Obter perfil
 $stmt = $db->prepare("
     SELECT u.username, p.name, p.bio, p.profile_image
     FROM users u
@@ -23,12 +22,10 @@ if (!$user) {
     exit();
 }
 
-// Buscar apenas serviços aprovados
 $stmt = $db->prepare("SELECT id, title, price FROM services WHERE freelancer_id = ? AND status = 'aprovado'");
 $stmt->execute([$user_id]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Imagem
 $imgPath = !empty($user['profile_image']) && file_exists('../' . $user['profile_image'])
     ? '/' . htmlspecialchars($user['profile_image'])
     : '/uploads/profiles/default_profile.png';

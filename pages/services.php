@@ -1,7 +1,6 @@
 <?php
 require_once '../includes/db.php';
 
-// Obter categorias aprovadas e usadas em serviços
 $categoriesStmt = $db->query("
     SELECT DISTINCT s.category 
     FROM services s 
@@ -10,11 +9,9 @@ $categoriesStmt = $db->query("
 ");
 $categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// Obter moedas distintas
 $currenciesStmt = $db->query("SELECT DISTINCT currency FROM services WHERE currency IS NOT NULL AND currency != ''");
 $currencies = $currenciesStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// Guardar filtros do utilizador
 $selectedCategory = $_GET['category'] ?? '';
 $selectedCurrency = $_GET['currency'] ?? '';
 $minPrice = $_GET['min_price'] ?? '';
@@ -31,7 +28,6 @@ $sort = $_GET['sort'] ?? 'latest';
 <main class="services-page">
     <h2>🌐 Todos os Serviços Disponíveis</h2>
 
-    <!-- Filtros -->
     <form id="filter-form" method="get" class="filter-form">
         <div class="filter-group">
             <label>Categoria:
@@ -80,7 +76,6 @@ $sort = $_GET['sort'] ?? 'latest';
         </div>
     </form>
 
-    <!-- Resultados AJAX -->
     <div id="service-results" class="card-grid"></div>
 </main>
 
@@ -107,7 +102,6 @@ document.getElementById('filter-form').addEventListener('submit', function (e) {
         });
 });
 
-// Carregamento inicial
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('filter-form').dispatchEvent(new Event('submit'));
 });

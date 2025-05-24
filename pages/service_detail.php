@@ -22,7 +22,7 @@ if (!$service) {
     exit();
 }
 
-// Função para símbolo da moeda
+
 function getCurrencySymbol($currency) {
     return match (strtoupper($currency)) {
         'USD' => '$',
@@ -34,7 +34,6 @@ function getCurrencySymbol($currency) {
     };
 }
 
-// Verificar se já é favorito
 $isFavorite = false;
 if (isset($_SESSION['user_id'])) {
     $checkFav = $db->prepare("SELECT 1 FROM favorites WHERE user_id = :uid AND service_id = :sid");

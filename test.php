@@ -1,10 +1,8 @@
 <?php
-// Mostrar erros para debug
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Conexão com o banco
 require_once 'includes/db.php';
 
 echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Test DB</title></head><body>";

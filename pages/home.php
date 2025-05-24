@@ -16,7 +16,6 @@ require_once '../includes/db.php';
 <?php include '../includes/header.php'; ?>
 
 <?php
-// Buscar até 6 serviços promovidos
 $stmt = $db->prepare("
     SELECT s.*, u.username
     FROM services s

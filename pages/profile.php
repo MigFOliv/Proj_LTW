@@ -6,7 +6,7 @@ require_login();
 
 $user_id = $_SESSION['user_id'];
 
-// Buscar dados do utilizador
+
 $stmt = $db->prepare('
     SELECT u.username, u.email, p.name, p.bio, p.profile_image
     FROM users u
@@ -16,7 +16,6 @@ $stmt = $db->prepare('
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Atualizar perfil
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         die("Token CSRF inválido.");

@@ -14,12 +14,10 @@ require_login();
 <?php
 $user_id = $_SESSION['user_id'];
 
-// Apenas serviços aprovados
 $stmt = $db->prepare("SELECT COUNT(*) FROM services WHERE freelancer_id = ? AND status = 'aprovado'");
 $stmt->execute([$user_id]);
 $total_services = $stmt->fetchColumn();
 
-// Total de pedidos recebidos
 $stmt = $db->prepare("
     SELECT COUNT(*) 
     FROM transactions t
@@ -29,7 +27,6 @@ $stmt = $db->prepare("
 $stmt->execute([$user_id]);
 $total_orders = $stmt->fetchColumn();
 
-// Total concluídos
 $stmt = $db->prepare("
     SELECT COUNT(*) 
     FROM transactions t
@@ -39,7 +36,6 @@ $stmt = $db->prepare("
 $stmt->execute([$user_id]);
 $completed = $stmt->fetchColumn();
 
-// Média de avaliações
 $stmt = $db->prepare("
     SELECT AVG(r.rating)
     FROM reviews r

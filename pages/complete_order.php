@@ -38,7 +38,6 @@ if (!$transaction_id || !is_numeric($transaction_id)) {
     exit();
 }
 
-// Verifica se a transação pertence a um serviço do freelancer autenticado
 $stmt = $db->prepare("
     SELECT t.*, s.freelancer_id
     FROM transactions t
@@ -54,7 +53,6 @@ if (!$transaction || $transaction['freelancer_id'] != $user_id) {
     exit();
 }
 
-// Atualiza o estado para 'completed'
 $update = $db->prepare("
     UPDATE transactions
     SET status = 'completed', completed_at = CURRENT_TIMESTAMP

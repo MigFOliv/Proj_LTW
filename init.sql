@@ -1,4 +1,4 @@
--- Remover as tabelas existentes na ordem correta para evitar conflitos de FK
+
 DROP TABLE IF EXISTS favorites;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS messages;

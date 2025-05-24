@@ -25,7 +25,6 @@ $stmt = $db->prepare("
 $stmt->execute([':uid' => $user_id]);
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Função para símbolo da moeda
 function getCurrencySymbol($currency) {
     return match (strtoupper($currency)) {
         'USD' => '$',

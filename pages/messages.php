@@ -7,7 +7,6 @@ require_login();
 $user_id = $_SESSION['user_id'];
 $errors = [];
 
-// Enviar nova mensagem
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'], $_POST['receiver_id'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Token CSRF inválido.";

@@ -9,7 +9,6 @@ require_once '../includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Validar ID da transação
 if (!isset($_GET['transaction']) || !is_numeric($_GET['transaction'])) {
     echo "<main class='dashboard-container'><p class='error'>❌ Transação inválida.</p></main>";
     include '../includes/footer.php';
@@ -18,7 +17,7 @@ if (!isset($_GET['transaction']) || !is_numeric($_GET['transaction'])) {
 
 $transaction_id = (int) $_GET['transaction'];
 
-// Verificar se o cliente pode avaliar este serviço
+
 $stmt = $db->prepare("
     SELECT t.*, s.title
     FROM transactions t
@@ -34,7 +33,7 @@ if (!$transaction) {
     exit();
 }
 
-// Verificar se já foi avaliado
+
 $check = $db->prepare("SELECT 1 FROM reviews WHERE transaction_id = :id");
 $check->execute([':id' => $transaction_id]);
 if ($check->fetch()) {
@@ -43,7 +42,6 @@ if ($check->fetch()) {
     exit();
 }
 
-// Processar submissão
 $success = false;
 $errors = [];
 

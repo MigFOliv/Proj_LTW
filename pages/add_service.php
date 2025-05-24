@@ -50,15 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
-            // Inserir categoria como pendente se não existir ainda
             $check = $db->prepare("SELECT 1 FROM categories WHERE LOWER(name) = LOWER(:name)");
             $check->execute([':name' => $category]);
             if (!$check->fetch()) {
                 $insert = $db->prepare("INSERT INTO categories (name, approved) VALUES (:name, 0)");
                 $insert->execute([':name' => $category]);
             }
-
-            // Inserir o serviço
             $stmt = $db->prepare("INSERT INTO services (
                 freelancer_id, title, description, price, currency, delivery_time, category, media_path, status
             ) VALUES (
