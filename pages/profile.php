@@ -6,7 +6,6 @@ require_login();
 
 $user_id = $_SESSION['user_id'];
 
-
 $stmt = $db->prepare('
     SELECT u.username, u.email, p.name, p.bio, p.profile_image
     FROM users u
@@ -23,10 +22,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $name = trim($_POST['name'] ?? '');
     $bio = trim($_POST['bio'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $image_path = $user['profile_image'] ?? null;
 
     if (strlen($name) > 100) $name = substr($name, 0, 100);
     if (strlen($bio) > 1000) $bio = substr($bio, 0, 1000);
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        die("Email inválido.");
+    }
+
+    $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
+    $stmt->execute([$email, $user_id]);
+    if ($stmt->fetch()) {
+        die("Este email já está a ser usado por outro utilizador.");
+    }
+
+    $stmt = $db->prepare('UPDATE users SET email = ? WHERE id = ?');
+    $stmt->execute([$email, $user_id]);
 
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         $tmp_name = $_FILES['profile_image']['tmp_name'];
@@ -86,6 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" name="name" maxlength="100" value="<?= htmlspecialchars($user['name'] ?? '') ?>">
         </label>
 
+        <label>Email:
+            <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>">
+        </label>
+
         <label>Biografia:
             <textarea name="bio" maxlength="1000" rows="4"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
         </label>
@@ -99,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <h3 style="margin-top: 2rem;">📧 Informações da Conta</h3>
     <ul class="stats-list">
-        <li><strong>Nome:</strong> <?= htmlspecialchars($user['username']) ?></li>
+        <li><strong>Nome de Utilizador:</strong> <?= htmlspecialchars($user['username']) ?></li>
         <li><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></li>
     </ul>
 
