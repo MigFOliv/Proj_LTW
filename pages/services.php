@@ -1,12 +1,22 @@
 <?php
 require_once '../includes/db.php';
 
-// Obter categorias distintas
-$categoriesStmt = $db->query("SELECT DISTINCT category FROM services WHERE category IS NOT NULL AND category != ''");
+// Obter categorias aprovadas e usadas em serviços
+$categoriesStmt = $db->query("
+    SELECT DISTINCT s.category 
+    FROM services s 
+    JOIN categories c ON LOWER(s.category) = LOWER(c.name)
+    WHERE c.approved = 1 AND s.category IS NOT NULL AND s.category != ''
+");
 $categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Obter moedas distintas
+$currenciesStmt = $db->query("SELECT DISTINCT currency FROM services WHERE currency IS NOT NULL AND currency != ''");
+$currencies = $currenciesStmt->fetchAll(PDO::FETCH_COLUMN);
 
 // Guardar filtros do utilizador
 $selectedCategory = $_GET['category'] ?? '';
+$selectedCurrency = $_GET['currency'] ?? '';
 $minPrice = $_GET['min_price'] ?? '';
 $maxPrice = $_GET['max_price'] ?? '';
 $sort = $_GET['sort'] ?? 'latest';
@@ -39,6 +49,17 @@ $sort = $_GET['sort'] ?? 'latest';
                 </select>
             </label>
 
+            <label>Moeda:
+                <select name="currency">
+                    <option value="">Todas</option>
+                    <?php foreach ($currencies as $cur): ?>
+                        <option value="<?= htmlspecialchars($cur) ?>" <?= $cur === $selectedCurrency ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($cur) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
             <label>Preço mínimo:
                 <input type="number" step="0.01" name="min_price" value="<?= htmlspecialchars($minPrice) ?>">
             </label>
@@ -51,7 +72,7 @@ $sort = $_GET['sort'] ?? 'latest';
                 <select name="sort">
                     <option value="latest" <?= $sort === 'latest' ? 'selected' : '' ?>>Mais Recentes</option>
                     <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Preço (Menor → Maior)</option>
-                    <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Preço (Maior → Menor)</option>
+                    <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Preço (Maior → Maior)</option>
                 </select>
             </label>
 

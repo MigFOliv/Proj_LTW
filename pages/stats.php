@@ -7,7 +7,6 @@ require_login();
 <!DOCTYPE html>
 <html lang="pt">
 <?php include '../includes/head.php'; ?>
-<!-- Adiciona Chart.js no head.php ou aqui -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <body>
 <?php include '../includes/header.php'; ?>
@@ -15,8 +14,8 @@ require_login();
 <?php
 $user_id = $_SESSION['user_id'];
 
-// Total de serviços
-$stmt = $db->prepare("SELECT COUNT(*) FROM services WHERE freelancer_id = ?");
+// Apenas serviços aprovados
+$stmt = $db->prepare("SELECT COUNT(*) FROM services WHERE freelancer_id = ? AND status = 'aprovado'");
 $stmt->execute([$user_id]);
 $total_services = $stmt->fetchColumn();
 
@@ -58,7 +57,7 @@ $average = $stmt->fetchColumn();
     <ul class="stats-list">
         <li><strong>Total de serviços publicados:</strong> <?= $total_services ?></li>
         <li><strong>Pedidos recebidos:</strong> <?= $total_orders ?></li>
-        <li><strong>Pedidos concluídos:</strong> <?= $completed ?></li>
+        <li><strong>Pedidos Entregues:</strong> <?= $completed ?></li>
         <li><strong>Média de avaliações:</strong> <?= $average ? number_format($average, 1) . " / 5 ⭐" : 'Sem avaliações ainda' ?></li>
     </ul>
 
@@ -109,4 +108,3 @@ new Chart(ctx, {
 </script>
 </body>
 </html>
-

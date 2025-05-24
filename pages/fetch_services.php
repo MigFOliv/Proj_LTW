@@ -1,7 +1,9 @@
 <?php
 require_once '../includes/db.php';
+session_start();
 
 $selectedCategory = $_GET['category'] ?? '';
+$selectedCurrency = $_GET['currency'] ?? '';
 $minPrice = $_GET['min_price'] ?? '';
 $maxPrice = $_GET['max_price'] ?? '';
 $sort = $_GET['sort'] ?? 'latest';
@@ -19,7 +21,8 @@ $query = "
          WHERE t.service_id = s.id) as avg_rating
     FROM services s
     JOIN users u ON s.freelancer_id = u.id
-    WHERE 1=1
+    JOIN categories c ON LOWER(s.category) = LOWER(c.name)
+    WHERE c.approved = 1
 ";
 
 $params = [];
@@ -28,10 +31,17 @@ if (!empty($selectedCategory)) {
     $query .= " AND s.category = :category";
     $params[':category'] = $selectedCategory;
 }
+
+if (!empty($selectedCurrency)) {
+    $query .= " AND s.currency = :currency";
+    $params[':currency'] = $selectedCurrency;
+}
+
 if (is_numeric($minPrice)) {
     $query .= " AND s.price >= :min";
     $params[':min'] = $minPrice;
 }
+
 if (is_numeric($maxPrice)) {
     $query .= " AND s.price <= :max";
     $params[':max'] = $maxPrice;
@@ -55,11 +65,27 @@ $stmt = $db->prepare($query);
 $stmt->execute($params);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if (count($services) === 0): ?>
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
+?>
+
+<?php if (count($services) === 0): ?>
     <p class="no-services">🚫 Não há serviços disponíveis de momento.</p>
 <?php else: ?>
     <?php foreach ($services as $s): ?>
         <div class="service-card">
+            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $s['freelancer_id']): ?>
+                <a href="edit_service.php?id=<?= $s['id'] ?>" class="edit-btn-small" title="Editar Serviço">✏️</a>
+            <?php endif; ?>
+
             <?php
             $imgPath = '../' . $s['media_path'];
             if (!empty($s['media_path']) && file_exists($imgPath)):
@@ -74,7 +100,10 @@ if (count($services) === 0): ?>
             <?php endif; ?>
 
             <p class="description"><?= htmlspecialchars($s['description']) ?></p>
-            <p><strong><?= htmlspecialchars($s['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($s['delivery_time']) ?></p>
+            <p>
+                <strong><?= getCurrencySymbol($s['currency'] ?? '') . number_format($s['price'], 2) ?></strong>
+                • Entrega: <?= htmlspecialchars($s['delivery_time']) ?>
+            </p>
             <p><small>Por <strong><?= htmlspecialchars($s['username']) ?></strong> • Categoria: <?= htmlspecialchars($s['category'] ?? '—') ?></small></p>
             <a href="service_detail.php?id=<?= $s['id'] ?>" class="primary-btn">🔍 Ver mais</a>
         </div>

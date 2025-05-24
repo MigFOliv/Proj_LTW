@@ -1,3 +1,4 @@
+
 <?php
 require_once '../includes/auth.php';
 require_login();
@@ -23,6 +24,18 @@ $stmt = $db->prepare("
 ");
 $stmt->execute([':uid' => $user_id]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Função para símbolo da moeda
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
 ?>
 
 <main class="dashboard-container">
@@ -42,6 +55,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                     <p><strong>Data:</strong> <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
                     <p><strong>Estado:</strong> <?= ucfirst(htmlspecialchars($order['status'])) ?></p>
+                    <p>
+                        <strong>Valor:</strong>
+                        <?= getCurrencySymbol($order['currency'] ?? '') . number_format($order['amount'], 2) ?>
+                    </p>
 
                     <?php if ($order['status'] === 'completed'): ?>
                         <?php

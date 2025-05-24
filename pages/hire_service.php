@@ -1,3 +1,4 @@
+
 <?php
 require_once '../includes/auth.php';
 require_once '../includes/db.php';
@@ -17,21 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $service_id = $_POST['service_id'] ?? null;
 
-// Verifica CSRF
 if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
     echo "<main class='dashboard-container'><p class='error'>❌ Token CSRF inválido.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Validação
 if (!$service_id || !is_numeric($service_id)) {
     echo "<main class='dashboard-container'><p class='error'>❌ Serviço inválido.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Verifica se o serviço existe
+// Obter dados do serviço
 $stmt = $db->prepare("SELECT * FROM services WHERE id = :id");
 $stmt->execute([':id' => $service_id]);
 $service = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -42,14 +41,13 @@ if (!$service) {
     exit();
 }
 
-// Impede contratar o próprio serviço
 if ($service['freelancer_id'] == $user_id) {
     echo "<main class='dashboard-container'><p class='error'>❌ Não podes contratar o teu próprio serviço.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Verifica se já há transação pendente
+// Verificar se já existe transação pendente
 $check = $db->prepare("
     SELECT id FROM transactions
     WHERE client_id = :cid AND service_id = :sid AND status = 'pending'
@@ -57,9 +55,17 @@ $check = $db->prepare("
 $check->execute([':cid' => $user_id, ':sid' => $service_id]);
 
 if (!$check->fetch()) {
-    // Cria nova transação
-    $stmt = $db->prepare("INSERT INTO transactions (client_id, service_id) VALUES (:cid, :sid)");
-    $stmt->execute([':cid' => $user_id, ':sid' => $service_id]);
+    // Criar nova transação com valor e moeda atual do serviço
+    $stmt = $db->prepare("
+        INSERT INTO transactions (client_id, service_id, amount, currency)
+        VALUES (:cid, :sid, :amount, :currency)
+    ");
+    $stmt->execute([
+        ':cid' => $user_id,
+        ':sid' => $service_id,
+        ':amount' => $service['price'],
+        ':currency' => $service['currency']
+    ]);
 }
 ?>
 

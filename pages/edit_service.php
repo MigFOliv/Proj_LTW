@@ -1,4 +1,3 @@
-
 <?php
 require_once '../includes/auth.php';
 require_once '../includes/db.php';
@@ -32,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
+        $currency = trim($_POST['currency'] ?? 'USD');
         $delivery = trim($_POST['delivery_time'] ?? '');
         $category = trim($_POST['category'] ?? '');
         $is_promoted = isset($_POST['is_promoted']) ? 1 : 0;
         $newMediaPath = $service['media_path'];
 
-        // Upload de nova imagem (opcional)
         if (!empty($_FILES['media']['name']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
             $tmp = $_FILES['media']['tmp_name'];
             $mime = mime_content_type($tmp);
@@ -54,11 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = "Erro ao guardar a imagem.";
                 }
             } else {
-                $errors[] = "Tipo de ficheiro inválido. Apenas JPG, PNG e GIF são permitidos.";
+                $errors[] = "Tipo de ficheiro inválido.";
             }
         }
 
-        // Validações
         if (strlen($title) < 3 || strlen($description) < 10 || $price <= 0 || strlen($delivery) < 3) {
             $errors[] = "Preenche todos os campos obrigatórios corretamente.";
         }
@@ -67,14 +65,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update = $db->prepare("
                 UPDATE services 
                 SET title = :title, description = :desc, price = :price, 
-                    delivery_time = :delivery, category = :category, 
-                    media_path = :media, is_promoted = :promoted
+                    currency = :currency, delivery_time = :delivery, category = :category, 
+                    media_path = :media, is_promoted = :promoted, status = 'pendente'
                 WHERE id = :id AND freelancer_id = :uid
             ");
             $update->execute([
                 ':title' => $title,
                 ':desc' => $description,
                 ':price' => $price,
+                ':currency' => $currency,
                 ':delivery' => $delivery,
                 ':category' => $category,
                 ':media' => $newMediaPath,
@@ -83,16 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':uid' => $_SESSION['user_id']
             ]);
             $success = true;
-
-            $service = array_merge($service, [
-                'title' => $title,
-                'description' => $description,
-                'price' => $price,
-                'delivery_time' => $delivery,
-                'category' => $category,
-                'media_path' => $newMediaPath,
-                'is_promoted' => $is_promoted
-            ]);
         }
     }
 }
@@ -109,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endforeach; ?>
 
     <?php if ($success): ?>
-        <p class="success">✅ Serviço atualizado com sucesso!</p>
+        <p class="success">✅ Serviço atualizado com sucesso! Está agora em análise para nova aprovação.</p>
     <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data" class="auth-form" style="max-width: 600px; margin: 0 auto;">
@@ -123,8 +112,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea name="description" rows="4" required minlength="10"><?= htmlspecialchars($service['description']) ?></textarea>
         </label>
 
-        <label>Preço (€):
+        <label>Preço:
             <input type="number" name="price" step="0.01" min="1" value="<?= htmlspecialchars($service['price']) ?>" required>
+        </label>
+
+        <label>Moeda:
+            <select name="currency">
+                <option value="USD" <?= $service['currency'] === 'USD' ? 'selected' : '' ?>>USD</option>
+                <option value="EUR" <?= $service['currency'] === 'EUR' ? 'selected' : '' ?>>EUR</option>
+                <option value="GBP" <?= $service['currency'] === 'GBP' ? 'selected' : '' ?>>GBP</option>
+                <option value="BRL" <?= $service['currency'] === 'BRL' ? 'selected' : '' ?>>BRL</option>
+            </select>
         </label>
 
         <label>Tempo de entrega:

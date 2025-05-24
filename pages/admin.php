@@ -6,18 +6,17 @@ require_once '../includes/db.php';
 require_once '../includes/head.php';
 require_once '../includes/header.php';
 
-// Verifica se é admin
 if ($_SESSION['is_admin'] != 1) {
     echo "<main class='dashboard-container'><p class='error'>❌ Acesso restrito. Apenas administradores podem aceder.</p></main>";
     include '../includes/footer.php';
     exit();
 }
 
-// Promoção de utilizador a admin
+$message = '';
+
+// Promoção a admin
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['promote_id'])) {
-    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        die("Token CSRF inválido.");
-    }
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) die("Token CSRF inválido.");
 
     $promote_id = (int) $_POST['promote_id'];
     if ($promote_id > 0) {
@@ -27,43 +26,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['promote_id'])) {
     }
 }
 
-// Nova categoria
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_category'])) {
-    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        die("Token CSRF inválido.");
-    }
+// Aprovar/reprovar serviço
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['service_action'])) {
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) die("Token CSRF inválido.");
 
-    $name = trim($_POST['new_category']);
-    if (!empty($name) && strlen($name) <= 50) {
-        $stmt = $db->prepare("INSERT OR IGNORE INTO categories (name) VALUES (:name)");
-        $stmt->execute([':name' => $name]);
-        $message = "✅ Categoria adicionada com sucesso.";
-    } else {
-        $error = "❌ Nome de categoria inválido.";
+    $serviceId = (int) $_POST['service_id'];
+    $action = $_POST['service_action'];
+
+    if (in_array($action, ['aprovado', 'reprovado']) && $serviceId > 0) {
+        $stmt = $db->prepare("UPDATE services SET status = :status WHERE id = :id");
+        $stmt->execute([':status' => $action, ':id' => $serviceId]);
+        $message = "✅ Serviço ID $serviceId atualizado para '$action'.";
     }
 }
 
-// Obter dados
+// Dados
 $users = $db->query("SELECT id, username, email, is_admin FROM users ORDER BY username ASC")->fetchAll(PDO::FETCH_ASSOC);
-$categories = $db->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$totalUsers = $db->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$totalPostedServices = $db->query("SELECT COUNT(*) FROM services WHERE status = 'aprovado'")->fetchColumn();
+$totalTransactions = $db->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
+$totalReviews = $db->query("SELECT COUNT(*) FROM reviews")->fetchColumn();
+$pendingServices = $db->query("
+    SELECT s.id, s.title, u.username
+    FROM services s
+    JOIN users u ON s.freelancer_id = u.id
+    WHERE s.status = 'pendente'
+    ORDER BY s.id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <main class="dashboard-container">
     <h2>⚙️ Painel de Administração</h2>
 
-    <?php if (isset($message)): ?>
+    <?php if (!empty($message)): ?>
         <p class="success"><?= htmlspecialchars($message) ?></p>
     <?php endif; ?>
-    <?php if (isset($error)): ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+
+    <section style="margin-top: 2rem;">
+        <h3>📊 Estatísticas Gerais</h3>
+        <ul class="stats-list">
+            <li>👤 Utilizadores registados: <strong><?= $totalUsers ?></strong></li>
+            <li>🛠 Serviços ativos: <strong><?= $totalPostedServices ?></strong></li>
+            <li>🛒 Serviços contratados: <strong><?= $totalTransactions ?></strong></li>
+            <li>⭐ Avaliações feitas: <strong><?= $totalReviews ?></strong></li>
+        </ul>
+    </section>
+
+    <hr>
 
     <section style="margin-top: 2rem;">
         <h3>👥 Utilizadores</h3>
         <div class="table-responsive">
             <table class="admin-table">
                 <thead>
-                    <tr><th>Username</th><th>Email</th><th>Tipo</th><th>Ação</th></tr>
+                    <tr>
+                        <th style="padding-right: 20px;">Username</th>
+                        <th style="padding-right: 20px;">Email</th>
+                        <th style="padding-right: 20px;">Tipo</th>
+                        <th>Ação</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($users as $u): ?>
@@ -90,19 +111,46 @@ $categories = $db->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll
     <hr>
 
     <section style="margin-top: 2rem;">
-        <h3>📁 Categorias</h3>
-        <ul class="stats-list">
-            <?php foreach ($categories as $c): ?>
-                <li><?= htmlspecialchars($c['name']) ?></li>
-            <?php endforeach; ?>
-        </ul>
+        <h3>🛠 Serviços Pendentes</h3>
 
-        <form method="post" class="auth-form" style="max-width: 400px; margin-top: 1.5rem;">
-            <label for="new_category">Nova categoria:</label>
-            <input type="text" name="new_category" required maxlength="50">
-            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-            <button type="submit" class="primary-btn">➕ Adicionar</button>
-        </form>
+        <?php if (count($pendingServices) === 0): ?>
+            <p>🎉 Nenhum serviço pendente no momento.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="admin-table" style="border-spacing: 0 10px; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="padding-right: 20px;">ID</th>
+                            <th style="padding-right: 20px;">Título</th>
+                            <th style="padding-right: 20px;">Freelancer</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pendingServices as $s): ?>
+                            <tr>
+                                <td><?= $s['id'] ?></td>
+                                <td><?= htmlspecialchars($s['title']) ?></td>
+                                <td><?= htmlspecialchars($s['username']) ?></td>
+                                <td>
+                                    <form method="post" class="inline-form" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                        <input type="hidden" name="service_id" value="<?= $s['id'] ?>">
+                                        <button name="service_action" value="aprovado" class="primary-btn">✔️ Aprovar</button>
+                                    </form>
+
+                                    <form method="post" class="inline-form" style="display:inline;" onsubmit="return confirm('Tens a certeza que queres reprovar este serviço?');">
+                                        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                        <input type="hidden" name="service_id" value="<?= $s['id'] ?>">
+                                        <button name="service_action" value="reprovado" class="danger-btn">❌ Reprovar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </section>
 </main>
 

@@ -7,6 +7,8 @@ require_login();
 $errors = [];
 $success = false;
 
+$availableCurrencies = ['EUR', 'USD', 'BRL', 'GBP', 'JPY'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Token CSRF inválido.";
@@ -16,7 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = floatval($_POST['price'] ?? 0);
         $delivery = trim($_POST['delivery_time'] ?? '');
         $category = trim($_POST['category'] ?? '');
+        $currency = strtoupper(trim($_POST['currency'] ?? 'EUR'));
         $mediaPath = null;
+
+        if (!in_array($currency, $availableCurrencies)) {
+            $errors[] = "Moeda inválida.";
+        }
 
         if (strlen($title) < 3 || strlen($description) < 10 || $price <= 0 || strlen($delivery) < 3) {
             $errors[] = "Todos os campos obrigatórios devem ser preenchidos corretamente.";
@@ -43,17 +50,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
-            $stmt = $db->prepare("INSERT INTO services (freelancer_id, title, description, price, delivery_time, category, media_path)
-                                  VALUES (:fid, :title, :desc, :price, :delivery, :cat, :media)");
+            // Inserir categoria como pendente se não existir ainda
+            $check = $db->prepare("SELECT 1 FROM categories WHERE LOWER(name) = LOWER(:name)");
+            $check->execute([':name' => $category]);
+            if (!$check->fetch()) {
+                $insert = $db->prepare("INSERT INTO categories (name, approved) VALUES (:name, 0)");
+                $insert->execute([':name' => $category]);
+            }
+
+            // Inserir o serviço
+            $stmt = $db->prepare("INSERT INTO services (
+                freelancer_id, title, description, price, currency, delivery_time, category, media_path, status
+            ) VALUES (
+                :fid, :title, :desc, :price, :currency, :delivery, :cat, :media, 'pendente'
+            )");
             $stmt->execute([
                 ':fid' => $_SESSION['user_id'],
                 ':title' => $title,
                 ':desc' => $description,
                 ':price' => $price,
+                ':currency' => $currency,
                 ':delivery' => $delivery,
                 ':cat' => $category,
                 ':media' => $mediaPath
             ]);
+            
             $success = true;
         }
     }
@@ -88,8 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea name="description" rows="4" required minlength="10"></textarea>
         </label>
 
-        <label>Preço (€):
+        <label>Preço:
             <input type="number" name="price" step="0.01" required min="1">
+        </label>
+
+        <label>Moeda:
+            <select name="currency" required>
+                <?php foreach ($availableCurrencies as $cur): ?>
+                    <option value="<?= $cur ?>"><?= $cur ?></option>
+                <?php endforeach; ?>
+            </select>
         </label>
 
         <label>Tempo de entrega:
@@ -113,4 +142,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-

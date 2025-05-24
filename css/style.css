@@ -520,3 +520,42 @@ footer {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
+
+.service-image {
+  max-width: 400px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.edit-btn-small {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  background-color: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.edit-btn-small:hover {
+  background-color: #0051aa;
+}
+
+.service-card a.primary-btn {
+  margin-top: 1rem;
+  display: inline-block;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1.25rem;
+  text-align: left;
+  vertical-align: middle;
+}

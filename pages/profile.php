@@ -100,14 +100,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <h3 style="margin-top: 2rem;">📧 Informações da Conta</h3>
     <ul class="stats-list">
-        <li><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></li>
+        <li><strong>Nome:</strong> <?= htmlspecialchars($user['username']) ?></li>
         <li><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></li>
     </ul>
 
     <h3 style="margin-top: 2rem;">💼 Meus Serviços</h3>
     <ul class="service-list">
         <?php
-        $stmt = $db->prepare('SELECT id, title, price FROM services WHERE freelancer_id = ?');
+        $stmt = $db->prepare('SELECT id, title, price FROM services WHERE freelancer_id = ? AND status = "aprovado"');
         $stmt->execute([$user_id]);
         $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </li>
             <?php endforeach;
         else:
-            echo '<li class="no-services">Ainda não publicaste serviços.</li>';
+            echo '<li class="no-services">Ainda não publicaste serviços aprovados.</li>';
         endif;
         ?>
     </ul>

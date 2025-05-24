@@ -6,6 +6,17 @@ require_once '../includes/head.php';
 require_once '../includes/header.php';
 require_login();
 
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
+
 $user_id = $_SESSION['user_id'];
 $transaction_id = $_POST['transaction'] ?? null;
 
@@ -53,7 +64,11 @@ $update->execute([':tid' => $transaction_id]);
 ?>
 
 <main class="dashboard-container">
-    <p class="success">✅ Pedido marcado como concluído com sucesso.</p>
+    <p class="success">
+        ✅ Pedido no valor de 
+        <strong><?= getCurrencySymbol($transaction['currency']) . number_format($transaction['amount'], 2) ?></strong> 
+        marcado como concluído com sucesso.
+    </p>
     <div class="dashboard-actions">
         <a href="my_requests.php" class="primary-btn">⬅️ Voltar aos Pedidos</a>
     </div>

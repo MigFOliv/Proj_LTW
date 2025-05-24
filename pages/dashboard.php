@@ -1,4 +1,3 @@
-
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -13,14 +12,38 @@ require_login();
 <!DOCTYPE html>
 <html lang="pt">
 <?php include '../includes/head.php'; ?>
-
 <body>
 <?php include '../includes/header.php'; ?>
 
 <?php
-$stmt = $db->prepare("SELECT * FROM services WHERE freelancer_id = :id ORDER BY id DESC");
+$stmt = $db->prepare("
+    SELECT *
+    FROM services
+    WHERE freelancer_id = :id
+    ORDER BY id DESC
+");
 $stmt->execute([':id' => $_SESSION['user_id']]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
+
+function renderStatusBadge($statusRaw) {
+    $status = strtolower($statusRaw ?? 'pendente');
+    return match ($status) {
+        'aprovado' => "<span style='color: green;'>✅ Aprovado</span>",
+        'reprovado' => "<span style='color: red;'>❌ Reprovado</span>",
+        default => "<span style='color: orange;'>⏳ Pendente</span>"
+    };
+}
 ?>
 
 <main class="dashboard-container">
@@ -45,12 +68,22 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <img src="/<?= htmlspecialchars($service['media_path']) ?>" alt="Imagem do serviço" class="service-image">
                     <?php endif; ?>
 
-                    <h4><?= htmlspecialchars($service['title']) ?>
+                    <h4>
+                        <?= htmlspecialchars($service['title']) ?>
                         <?= $service['is_promoted'] ? '<span title="Promovido">⭐</span>' : '' ?>
+                        <?= renderStatusBadge($service['status'] ?? null) ?>
                     </h4>
 
-                    <p><strong><?= htmlspecialchars($service['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($service['delivery_time']) ?></p>
+                    <p>
+                        <strong><?= getCurrencySymbol($service['currency'] ?? '') . number_format($service['price'], 2) ?></strong>
+                        • Entrega: <?= htmlspecialchars($service['delivery_time']) ?>
+                    </p>
+
                     <p class="description"><?= htmlspecialchars($service['description']) ?></p>
+
+                    <p>
+                        <strong>Categoria:</strong> <?= htmlspecialchars($service['category'] ?: '—') ?>
+                    </p>
 
                     <div class="service-actions">
                         <a href="edit_service.php?id=<?= $service['id'] ?>" class="primary-btn">✏️ Editar</a>

@@ -23,8 +23,8 @@ if (!$user) {
     exit();
 }
 
-// Serviços
-$stmt = $db->prepare("SELECT id, title, price FROM services WHERE freelancer_id = ?");
+// Buscar apenas serviços aprovados
+$stmt = $db->prepare("SELECT id, title, price FROM services WHERE freelancer_id = ? AND status = 'aprovado'");
 $stmt->execute([$user_id]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

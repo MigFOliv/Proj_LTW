@@ -22,6 +22,18 @@ if (!$service) {
     exit();
 }
 
+// Função para símbolo da moeda
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
+
 // Verificar se já é favorito
 $isFavorite = false;
 if (isset($_SESSION['user_id'])) {
@@ -50,7 +62,12 @@ if (isset($_SESSION['user_id'])) {
 
         <h4><?= htmlspecialchars($service['title']) ?></h4>
         <p class="description"><?= nl2br(htmlspecialchars($service['description'])) ?></p>
-        <p><strong><?= htmlspecialchars($service['price']) ?>€</strong> • Entrega: <?= htmlspecialchars($service['delivery_time']) ?></p>
+        <p>
+            <strong>
+                <?= getCurrencySymbol($service['currency'] ?? '') . number_format($service['price'], 2) ?>
+            </strong>
+            • Entrega: <?= htmlspecialchars($service['delivery_time']) ?>
+        </p>
         <p><small>
             Por <strong><?= htmlspecialchars($service['username']) ?></strong>
             (<a href="public_profile.php?id=<?= $service['freelancer_id'] ?>">👤 Ver perfil</a>)

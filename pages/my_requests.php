@@ -24,6 +24,18 @@ $stmt = $db->prepare("
 ");
 $stmt->execute([':uid' => $user_id]);
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Função para símbolo da moeda
+function getCurrencySymbol($currency) {
+    return match (strtoupper($currency)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'BRL' => 'R$',
+        'JPY' => '¥',
+        default => $currency
+    };
+}
 ?>
 
 <main class="dashboard-container">
@@ -43,6 +55,10 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                     <p><strong>Data:</strong> <?= date('d/m/Y H:i', strtotime($req['created_at'])) ?></p>
                     <p><strong>Estado:</strong> <?= ucfirst(htmlspecialchars($req['status'])) ?></p>
+                    <p>
+                        <strong>Valor:</strong>
+                        <?= getCurrencySymbol($req['currency'] ?? '') . number_format($req['amount'], 2) ?>
+                    </p>
 
                     <?php if ($req['status'] === 'pending'): ?>
                         <form method="post" action="complete_order.php" class="inline-form" onsubmit="return confirm('Confirmas que este serviço foi entregue?');">
@@ -62,4 +78,3 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-
