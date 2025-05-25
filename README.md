@@ -42,5 +42,5 @@
 
 ## Credentials
 
-- admin/p4s5w0rd
-- johndoe/1234
+- admin : miguel / miguel ou cristiano / cristiano
+- user : guilherme / guilherme ou ltw / ltwltw
