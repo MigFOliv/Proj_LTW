@@ -28,6 +28,8 @@
 - [x] Favorite/unfavorite services.
 - [x] View public profiles of freelancers.
 - [x] View system statistics.
+- [x] Profile picture upload and display.
+- [x] CSRF protection on profile editing.
 
 ## Running
 
