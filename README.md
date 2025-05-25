@@ -34,6 +34,7 @@
 - [x] Validation for profile input fields (e.g., max length, email format, image type).
 - [x] Duplicate email prevention during profile update.
 - [x] Display of approved freelancer services on profile pages.
+- [x] Multi-Currency support (EUR, GBP, USD and JPY).
 
 ## Running
 
