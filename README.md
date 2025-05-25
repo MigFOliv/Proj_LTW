@@ -30,6 +30,10 @@
 - [x] View system statistics.
 - [x] Profile picture upload and display.
 - [x] CSRF protection on profile editing.
+- [x] Custom default profile image fallback.
+- [x] Validation for profile input fields (e.g., max length, email format, image type).
+- [x] Duplicate email prevention during profile update.
+- [x] Display of approved freelancer services on profile pages.
 
 ## Running
 
