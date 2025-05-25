@@ -1,4 +1,3 @@
-
 <?php
 require_once 'includes/db.php';
 require_once 'includes/csrf.php';
@@ -81,12 +80,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <label>
                 Password:
-                <input type="password" name="password" required minlength="6">
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password" required minlength="6">
+                    <button type="button" onclick="togglePassword('password')" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                   background: none; border: none; cursor: pointer;">
+                        👁
+                    </button>
+                </div>
             </label>
 
             <label>
                 Confirmar Password:
-                <input type="password" name="confirm_password" required minlength="6">
+                <div style="position: relative;">
+                    <input type="password" name="confirm_password" id="confirm_password" required minlength="6">
+                    <button type="button" onclick="togglePassword('confirm_password')" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                   background: none; border: none; cursor: pointer;">
+                        👁
+                    </button>
+                </div>
             </label>
 
             <button type="submit" class="primary-btn">Criar Conta</button>
@@ -97,5 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </main>
 
 <?php include 'includes/footer.php'; ?>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    field.type = field.type === 'password' ? 'text' : 'password';
+}
+</script>
+
 </body>
 </html>

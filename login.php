@@ -1,4 +1,3 @@
-
 <?php
 require_once 'includes/db.php';
 require_once 'includes/csrf.php';
@@ -58,7 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label>
             Password:
-            <input type="password" name="password" required>
+            <div style="position: relative;">
+                <input type="password" name="password" id="password" required>
+                <button type="button" onclick="togglePassword()" 
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                               background: none; border: none; cursor: pointer;">
+                    👁
+                </button>
+            </div>
         </label>
 
         <button type="submit" class="primary-btn">Entrar</button>
@@ -68,5 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </main>
 
 <?php include 'includes/footer.php'; ?>
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const type = passwordField.type === 'password' ? 'text' : 'password';
+    passwordField.type = type;
+}
+</script>
+
 </body>
 </html>
